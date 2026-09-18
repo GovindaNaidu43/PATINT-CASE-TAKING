@@ -13,6 +13,7 @@ build/
 __pycache__/
 *.py[cod]
 .venv/
+*.db
 
 # Downloaded model artifacts
 ml/models/*
