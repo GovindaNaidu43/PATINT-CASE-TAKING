@@ -13,16 +13,17 @@ const IdentifyScreen: React.FC = () => {
   const [patient, setPatient] = useState<any>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [manualId, setManualId] = useState('');
+  const [newPatientName, setNewPatientName] = useState('');
+  const [lookupError, setLookupError] = useState('');
 
   const handleScan = async (abhaId: string) => {
-    const data = await getPatient(abhaId);
-    setPatient(data);
+    try { setPatient(await getPatient(abhaId)); setLookupError(''); }
+    catch { setManualId(abhaId); setLookupError('No local record was found. Register the patient below.'); }
   };
 
   const handleManualSubmit = async () => {
     if (manualId.length > 5) {
-      const data = await getPatient(manualId);
-      setPatient(data);
+      await handleScan(manualId);
     }
   };
 
@@ -49,8 +50,18 @@ const IdentifyScreen: React.FC = () => {
                 className="w-full bg-royal-surface border-2 border-royal-gold/40 rounded-xl p-6 text-xl text-white focus:border-royal-gold focus:shadow-gold-glow outline-none transition-all mb-6"
               />
               <RoyalButton variant="secondary" className="w-full" onClick={handleManualSubmit}>
-                Fetch via ABHA / OTP
+                Find local record
               </RoyalButton>
+              {lookupError && <p className="mt-4 text-warning text-sm">{lookupError}</p>}
+              {lookupError && (
+                <div className="mt-4 space-y-3">
+                  <input value={newPatientName} onChange={event => setNewPatientName(event.target.value)} placeholder="Patient full name" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <RoyalButton disabled={!newPatientName.trim()} className="w-full" onClick={async () => {
+                    const created = await createPatient({ name: newPatientName.trim(), abha_id: manualId, consent_granted: false });
+                    setPatient({ ...created, abha_id: manualId }); setLookupError('');
+                  }}>Register patient locally</RoyalButton>
+                </div>
+              )}
             </div>
           ) : (
             <motion.div 
@@ -63,18 +74,12 @@ const IdentifyScreen: React.FC = () => {
                   <span className="text-4xl">👤</span>
                 </div>
                 <h3 className="text-3xl font-display text-white mb-2">{patient.name}</h3>
-                <p className="text-royal-gold font-mono text-lg mb-4">ABHA: {patient.abhaId}</p>
-                <p className="text-gray-400 mb-10">{patient.age} years • {patient.gender === 'M' ? 'Male' : 'Female'}</p>
+                <p className="text-royal-gold font-mono text-lg mb-10">ABHA: {patient.abha_id || 'Not linked'}</p>
                 
                 <RoyalButton size="lg" className="w-full" disabled={isStarting} onClick={async () => {
                   setIsStarting(true);
                   try {
-                    const createdPatient = await createPatient({
-                      name: patient.name,
-                      abha_id: patient.abhaId,
-                      consent_granted: false,
-                    });
-                    const consultation = await createConsultation(createdPatient.id);
+                    const consultation = await createConsultation(patient.id);
                     window.localStorage.setItem('medikiosk.consultationId', consultation.id);
                     navigate('/consent');
                   } finally {
