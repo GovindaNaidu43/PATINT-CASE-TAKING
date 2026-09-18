@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from red_flags import detect_red_flags
+from red_flags import detect_red_flags, highest_priority
 from dashavidha_pariksha import next_question
 @dataclass
 class InterviewState:
@@ -31,13 +31,16 @@ class InterviewState:
         return state
 
     def process(self, text: str, modality: str = "text", language: str = "en") -> dict:
+        text = " ".join(text.split())
+        if not text:
+            return self._response(self.phase, self._retry_question(language), None, None, [], [])
         self.turns.append({"text": text, "modality": modality, "language": language})
         flags = detect_red_flags(text)
         if flags:
             self.phase = "red_flag_triage"
             return self._response(
                 "red_flag_triage",
-                "A clinician should assess this urgently. Are you currently safe?",
+                self._red_flag_message(language, highest_priority(flags)),
                 "red_flag_safety",
                 None,
                 flags,
@@ -98,3 +101,13 @@ class InterviewState:
             "options": options,
             "red_flags": red_flags,
         }
+
+    @staticmethod
+    def _retry_question(language: str) -> str:
+        return "कृपया अपना उत्तर फिर से बताएं।" if language == "hi" else "Please tell me that again."
+
+    @staticmethod
+    def _red_flag_message(language: str, priority: str | None) -> str:
+        if language == "hi":
+            return "आपकी बात पर तुरंत चिकित्सकीय जाँच आवश्यक है। कृपया पास के स्टाफ को अभी बुलाएँ।"
+        return "Your response needs immediate clinical assessment. Please alert nearby clinic staff now."
