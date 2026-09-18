@@ -1,0 +1,19 @@
+# Environment and secrets
+.env
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+.dart_tool/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Downloaded model artifacts
+ml/models/*
+!ml/models/.gitkeep
