@@ -1,0 +1,48 @@
+{
+  "welcome": {
+    "title": "MediKiosk",
+    "subtitle": "AI-Powered Clinical History · AYUSH OPD",
+    "cta": "Tap to Begin",
+    "footer": "Ministry of AYUSH"
+  },
+  "identify": {
+    "title": "Identify Patient",
+    "scanHeading": "Scan ABHA QR Code",
+    "manualHeading": "Or enter ABHA ID",
+    "continue": "Continue"
+  },
+  "consent": {
+    "title": "Your Privacy & Consent",
+    "proceed": "Proceed",
+    "note": "Consent is revocable. Ask staff at any time.",
+    "item1": { "title": "Clinical History Recording", "desc": "We will record your history using voice." },
+    "item2": { "title": "Voice Analysis", "desc": "Your voice helps assess Prakriti signals." },
+    "item3": { "title": "Tongue Image Capture", "desc": "A photo of your tongue will be captured." },
+    "item4": { "title": "Data Sharing with ABDM", "desc": "Records will be synced with your ABHA ID." }
+  },
+  "converse": {
+    "nurseName": "Nurse Avatar",
+    "hint": "Or speak your answer",
+    "done": "Thank you!"
+  },
+  "scan": {
+    "title": "Upload Previous Records",
+    "warning": "⚠ OCR output requires human review — verify before accepting",
+    "confirm": "Confirm & Accept",
+    "reject": "Reject"
+  },
+  "jihva": {
+    "title": "Tongue Examination (Jihva Pariksha)",
+    "hint": "Position tongue inside the frame",
+    "capture": "Capture",
+    "continue": "Continue"
+  },
+  "summary": {
+    "title": "Your Visit Summary",
+    "done": "Done",
+    "sent": "Your summary has been sent to your doctor."
+  },
+  "signal": {
+    "prefix": "⚡ Supporting Signal — Not a Diagnosis"
+  }
+}
