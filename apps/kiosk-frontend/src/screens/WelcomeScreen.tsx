@@ -45,6 +45,9 @@ const WelcomeScreen: React.FC = () => {
 
       <div className="absolute bottom-12 text-sm text-gray-500 font-display tracking-widest uppercase">
         {t('welcome.footer')}
+        <button className="ml-4 text-royal-gold/70 hover:text-royal-gold normal-case tracking-normal" onClick={() => navigate('/diagnostics')}>
+          Diagnostics
+        </button>
       </div>
     </div>
   );

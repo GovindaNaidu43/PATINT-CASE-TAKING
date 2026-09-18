@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 import QRScanner from '../components/ui/QRScanner';
 import RoyalCard from '../components/ui/RoyalCard';
 import RoyalButton from '../components/ui/RoyalButton';
-import { getPatient } from '../api/apiClient';
+import { createConsultation, createPatient, getPatient } from '../api/apiClient';
 
 const IdentifyScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [patient, setPatient] = useState<any>(null);
+  const [isStarting, setIsStarting] = useState(false);
   const [manualId, setManualId] = useState('');
 
   const handleScan = async (abhaId: string) => {
@@ -65,7 +66,21 @@ const IdentifyScreen: React.FC = () => {
                 <p className="text-royal-gold font-mono text-lg mb-4">ABHA: {patient.abhaId}</p>
                 <p className="text-gray-400 mb-10">{patient.age} years • {patient.gender === 'M' ? 'Male' : 'Female'}</p>
                 
-                <RoyalButton size="lg" className="w-full" onClick={() => navigate('/consent')}>
+                <RoyalButton size="lg" className="w-full" disabled={isStarting} onClick={async () => {
+                  setIsStarting(true);
+                  try {
+                    const createdPatient = await createPatient({
+                      name: patient.name,
+                      abha_id: patient.abhaId,
+                      consent_granted: false,
+                    });
+                    const consultation = await createConsultation(createdPatient.id);
+                    window.localStorage.setItem('medikiosk.consultationId', consultation.id);
+                    navigate('/consent');
+                  } finally {
+                    setIsStarting(false);
+                  }
+                }}>
                   {t('identify.continue')}
                 </RoyalButton>
               </RoyalCard>
