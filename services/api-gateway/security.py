@@ -37,3 +37,9 @@ def require_staff(credentials: HTTPAuthorizationCredentials | None = Depends(bea
     if not roles.intersection({"physician", "clinic_admin"}):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Physician role is required")
     return claims
+
+def require_physician(staff: dict = Depends(require_staff)) -> dict:
+    roles = set(staff.get("realm_access", {}).get("roles", []))
+    if "physician" not in roles:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Physician role is required for clinical signing")
+    return staff

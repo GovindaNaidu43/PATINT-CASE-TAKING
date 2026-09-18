@@ -6,6 +6,7 @@ from schemas import DialogueTurn
 from state_machine import InterviewState
 from security import kiosk_identity
 from events import hub
+from repertory import match_rubrics
 router = APIRouter(prefix="/dialogue", tags=["dialogue"])
 
 @router.post("/turn")
@@ -16,6 +17,7 @@ async def add_turn(consultation_id: str, turn: DialogueTurn, _: str = Depends(ki
 
 	state = InterviewState.from_turns(consultation.turns or [])
 	result = state.process(turn.text, turn.modality, turn.language)
+	rubrics = match_rubrics(turn.text)
 	consultation.turns = [
 		*(consultation.turns or []),
 		{
@@ -25,6 +27,7 @@ async def add_turn(consultation_id: str, turn: DialogueTurn, _: str = Depends(ki
 			"answer_key": result["answered_key"],
 			"phase": result["phase"],
 			"red_flags": result["red_flags"],
+			"rubrics": rubrics,
 		},
 	]
 	known_flags = {flag["phrase"]: flag for flag in (consultation.red_flags or [])}
@@ -34,4 +37,4 @@ async def add_turn(consultation_id: str, turn: DialogueTurn, _: str = Depends(ki
 	db.add(consultation)
 	db.commit()
 	await hub.publish("consultation.updated", {"consultation_id": consultation.id, "patient_id": consultation.patient_id, "status": consultation.status, "red_flag_count": len(consultation.red_flags or [])})
-	return {"consultation_id": consultation_id, **result}
+	return {"consultation_id": consultation_id, "rubrics": rubrics, **result}

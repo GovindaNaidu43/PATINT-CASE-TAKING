@@ -10,7 +10,9 @@ export const getPatient = async (abhaId: string) => {
   return response.data;
 };
 
-export const createPatient = async (patient: { name: string; abha_id?: string; consent_granted: boolean }) => {
+export type PatientRegistration = { name: string; age?: number; gender?: string; contact?: string; blood_group?: string; occupation?: string; abha_id?: string; consent_granted: boolean };
+
+export const createPatient = async (patient: PatientRegistration) => {
   const response = await apiClient.post('/patients', patient);
   return response.data;
 };

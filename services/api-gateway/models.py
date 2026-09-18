@@ -6,6 +6,11 @@ class Patient(Base):
     __tablename__ = "patients"
     id: Mapped[str] = mapped_column(String, primary_key=True)
     name: Mapped[str] = mapped_column(String)
+    age: Mapped[int | None] = mapped_column(nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    contact: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    blood_group: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    occupation: Mapped[str | None] = mapped_column(String(120), nullable=True)
     abha_id: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
     consent_granted: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -43,3 +48,28 @@ class SummaryDraft(Base):
     content: Mapped[str] = mapped_column(Text)
     sources: Mapped[list] = mapped_column(JSON)
     physician_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+class Prescription(Base):
+    __tablename__ = "prescriptions"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    consultation_id: Mapped[str] = mapped_column(ForeignKey("consultations.id"), index=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
+    remedy: Mapped[str] = mapped_column(String)
+    potency: Mapped[str] = mapped_column(String)
+    dosage: Mapped[str] = mapped_column(String)
+    schedule: Mapped[str] = mapped_column(String)
+    duration: Mapped[str] = mapped_column(String)
+    instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String, default="draft")
+    prescribed_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class FollowUp(Base):
+    __tablename__ = "followups"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    consultation_id: Mapped[str] = mapped_column(ForeignKey("consultations.id"), index=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
+    destination: Mapped[str] = mapped_column(String)
+    due_at: Mapped[datetime] = mapped_column(DateTime)
+    status: Mapped[str] = mapped_column(String, default="scheduled")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

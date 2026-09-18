@@ -14,6 +14,11 @@ const IdentifyScreen: React.FC = () => {
   const [isStarting, setIsStarting] = useState(false);
   const [manualId, setManualId] = useState('');
   const [newPatientName, setNewPatientName] = useState('');
+  const [newPatientAge, setNewPatientAge] = useState('');
+  const [newPatientGender, setNewPatientGender] = useState('');
+  const [newPatientContact, setNewPatientContact] = useState('');
+  const [newPatientBloodGroup, setNewPatientBloodGroup] = useState('');
+  const [newPatientOccupation, setNewPatientOccupation] = useState('');
   const [lookupError, setLookupError] = useState('');
 
   const handleScan = async (abhaId: string) => {
@@ -56,8 +61,17 @@ const IdentifyScreen: React.FC = () => {
               {lookupError && (
                 <div className="mt-4 space-y-3">
                   <input value={newPatientName} onChange={event => setNewPatientName(event.target.value)} placeholder="Patient full name" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="number" min="0" max="130" value={newPatientAge} onChange={event => setNewPatientAge(event.target.value)} placeholder="Age" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                    <select value={newPatientGender} onChange={event => setNewPatientGender(event.target.value)} className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white"><option value="">Gender</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
+                  </div>
+                  <input value={newPatientContact} onChange={event => setNewPatientContact(event.target.value)} placeholder="Contact number (optional)" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input value={newPatientBloodGroup} onChange={event => setNewPatientBloodGroup(event.target.value)} placeholder="Blood group" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                    <input value={newPatientOccupation} onChange={event => setNewPatientOccupation(event.target.value)} placeholder="Occupation" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  </div>
                   <RoyalButton disabled={!newPatientName.trim()} className="w-full" onClick={async () => {
-                    const created = await createPatient({ name: newPatientName.trim(), abha_id: manualId, consent_granted: false });
+                    const created = await createPatient({ name: newPatientName.trim(), age: newPatientAge ? Number(newPatientAge) : undefined, gender: newPatientGender || undefined, contact: newPatientContact || undefined, blood_group: newPatientBloodGroup || undefined, occupation: newPatientOccupation || undefined, abha_id: manualId, consent_granted: false });
                     setPatient({ ...created, abha_id: manualId }); setLookupError('');
                   }}>Register patient locally</RoyalButton>
                 </div>
