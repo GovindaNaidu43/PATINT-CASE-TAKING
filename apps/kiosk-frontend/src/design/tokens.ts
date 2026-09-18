@@ -1,15 +1,18 @@
+// Design tokens — kept in sync with tailwind.config.ts
 export const colors = {
-  royalBg: '#0D0A1A',
-  royalSurface: '#1A1535',
-  royalGold: '#C9A84C',
-  royalCrimson: '#8B1A1A',
-  royalIvory: '#F5ECD7',
-  royalTeal: '#2DD4BF',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444'
+  royalBg:      '#FAF3E8',  // warm cream
+  royalSurface: '#FFFDF8',  // card white
+  royalGold:    '#B8863C',  // muted gold
+  royalCrimson: '#A7685D',  // warm terracotta
+  royalIvory:   '#3E2E1E',  // dark brown text
+  royalMuted:   '#8A745A',  // muted brown
+  royalBorder:  '#E8D9BC',  // soft gold border
+  royalTeal:    '#8CA383',  // sage green
+  success:      '#8CA383',
+  warning:      '#C9974B',
+  error:        '#A7685D',
 } as const;
 
 export const shadows = {
-  goldGlow: '0 0 20px rgba(201,168,76,0.4)',
+  goldGlow: '0 12px 28px rgba(184,134,60,0.12)',
 } as const;

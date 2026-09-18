@@ -9,7 +9,7 @@ const ConsentScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { speak, isSpeaking } = useTTS();
-  
+
   const [consents, setConsents] = useState([false, false, false, false]);
 
   const toggleConsent = (index: number) => {
@@ -29,32 +29,41 @@ const ConsentScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
-      <h2 className="text-4xl font-display text-royal-gold mb-8 mt-4">{t('consent.title')}</h2>
-      
+      <h2 className="text-4xl font-display text-royal-gold mb-8 mt-4">
+        {t('consent.title')}
+      </h2>
+
       <div className="w-full max-w-4xl grid grid-cols-2 gap-6 mb-10">
         {items.map((item, idx) => (
           <RoyalCard key={idx} className="p-6 flex flex-col justify-between" glowing={consents[idx]}>
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">{item.icon}</span>
-                <button 
+                <button
                   onClick={() => speak(item.desc)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isSpeaking ? 'bg-royal-gold/20 text-royal-gold' : 'bg-royal-bg hover:bg-royal-gold/20 text-gray-400 hover:text-royal-gold'}`}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                  style={{
+                    background: isSpeaking ? 'rgba(201,151,75,0.15)' : 'rgba(232,217,188,0.5)',
+                    color: isSpeaking ? '#B8863C' : '#A89070',
+                  }}
                 >
                   🔊
                 </button>
               </div>
-              <h3 className="text-xl font-bold font-display text-white mb-2">{item.title}</h3>
-              <p className="text-gray-400 text-sm mb-6">{item.desc}</p>
+              <h3 className="text-xl font-bold font-display text-royal-ivory mb-2">
+                {item.title}
+              </h3>
+              <p className="text-royal-muted text-sm mb-6">{item.desc}</p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => toggleConsent(idx)}
-              className={`w-full py-3 rounded-lg border-2 font-bold uppercase tracking-wider transition-all ${
-                consents[idx] 
-                  ? 'bg-success/20 border-success text-success' 
-                  : 'bg-transparent border-gray-600 text-gray-400 hover:border-gray-400'
-              }`}
+              className="w-full py-3 rounded-lg border-2 font-bold uppercase tracking-wider transition-all"
+              style={{
+                background: consents[idx] ? 'rgba(140,163,131,0.15)' : 'transparent',
+                borderColor: consents[idx] ? '#8CA383' : '#D4C4A8',
+                color: consents[idx] ? '#8CA383' : '#A89070',
+              }}
             >
               {consents[idx] ? 'Accepted ✓' : 'Accept'}
             </button>
@@ -63,10 +72,10 @@ const ConsentScreen: React.FC = () => {
       </div>
 
       <div className="text-center w-full max-w-4xl">
-        <p className="text-gray-400 text-sm mb-6">{t('consent.note')}</p>
-        <RoyalButton 
-          size="lg" 
-          disabled={!allAccepted} 
+        <p className="text-royal-muted text-sm mb-6">{t('consent.note')}</p>
+        <RoyalButton
+          size="lg"
+          disabled={!allAccepted}
           onClick={() => navigate('/converse')}
           className="w-full max-w-md mx-auto"
         >

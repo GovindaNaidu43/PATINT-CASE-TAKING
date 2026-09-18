@@ -12,7 +12,6 @@ const ScanScreen: React.FC = () => {
   const [ocrData, setOcrData] = useState<OCRResult | null>(null);
 
   const handleSimulateUpload = () => {
-    // Simulate upload delay
     setTimeout(() => {
       setOcrData(mockOCRResult);
       setScanned(true);
@@ -32,28 +31,40 @@ const ScanScreen: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto">
       <h2 className="text-3xl font-display text-royal-gold mb-8">{t('scan.title')}</h2>
-      
+
       {!scanned ? (
         <div className="w-full max-w-3xl flex flex-col items-center">
-          <div 
-            className="w-full h-80 border-4 border-dashed border-royal-gold/30 rounded-2xl flex flex-col items-center justify-center bg-royal-surface/50 mb-8 cursor-pointer hover:border-royal-gold hover:bg-royal-surface transition-all"
+          <div
+            className="w-full h-80 rounded-2xl flex flex-col items-center justify-center mb-8 cursor-pointer transition-all"
+            style={{
+              border: '4px dashed rgba(184,134,60,0.35)',
+              background: 'rgba(255,253,248,0.60)',
+            }}
             onClick={handleSimulateUpload}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = '#B8863C';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,253,248,0.85)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(184,134,60,0.35)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,253,248,0.60)';
+            }}
           >
             <span className="text-6xl mb-4">📄</span>
-            <p className="text-xl font-bold mb-2">Tap to Capture Document</p>
-            <p className="text-gray-400">or place on scanner</p>
+            <p className="text-xl font-bold text-royal-ivory mb-2">Tap to Capture Document</p>
+            <p className="text-royal-muted">or place on scanner</p>
           </div>
-          
+
           <RoyalButton variant="secondary" onClick={() => navigate('/jihva')}>
             Skip for now
           </RoyalButton>
         </div>
       ) : (
         ocrData && (
-          <OCRReviewPanel 
-            ocrResult={ocrData} 
-            onConfirm={handleConfirm} 
-            onReject={handleReject} 
+          <OCRReviewPanel
+            ocrResult={ocrData}
+            onConfirm={handleConfirm}
+            onReject={handleReject}
           />
         )
       )}

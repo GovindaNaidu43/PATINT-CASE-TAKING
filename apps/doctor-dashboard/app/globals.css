@@ -2,18 +2,126 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── CSS custom properties ─────────────────────────── */
+:root {
+  --bg-cream:        #FAF3E8;
+  --bg-cream-deep:   #F0DEC0;
+  --gold-primary:    #B8863C;
+  --gold-accent:     #C9974B;
+  --gold-bright:     #D4AF37;
+  --card-white:      #FFFDF8;
+  --text-dark:       #3E2E1E;
+  --text-muted:      #8A745A;
+  --success-sage:    #8CA383;
+  --border-soft:     #E8D9BC;
+}
+
+/* ─── Body / Background ─────────────────────────────── */
 @layer base {
   body {
     @apply bg-royal-bg text-royal-ivory font-sans;
+    background-image:
+      radial-gradient(ellipse at 85% 10%, rgba(240, 222, 192, 0.70), transparent 32%),
+      radial-gradient(ellipse at 95% 90%, rgba(201, 151, 75, 0.55), transparent 38%),
+      radial-gradient(ellipse at 15% 55%, rgba(250, 243, 232, 0.75), transparent 42%),
+      linear-gradient(160deg, #FBF5EB 0%, #F5E8D0 50%, #EDDBBC 100%);
+    min-height: 100vh;
   }
 }
 
-::-webkit-scrollbar {
-  width: 8px;
+/* ─── Mandala animation keyframes ───────────────────── */
+@keyframes spin-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
-::-webkit-scrollbar-track {
-  @apply bg-royal-bg;
+@keyframes spin-ccw {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
 }
-::-webkit-scrollbar-thumb {
-  @apply bg-royal-gold rounded-full;
+
+/* ─── Watercolor shell & mandala helpers ────────────── */
+.watercolor-shell {
+  position: relative;
+  isolation: isolate;
 }
+.watercolor-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 90% 8%, rgba(255,253,248,.45), transparent 18%),
+    radial-gradient(circle at 78% 84%, rgba(201,151,75,.14), transparent 24%);
+  filter: blur(24px);
+}
+
+.mandala {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  color: var(--gold-primary);
+}
+
+.mandala-top {
+  width: 300px;
+  right: -100px;
+  top: -100px;
+  opacity: 0.55;
+  animation: spin-cw 60s linear infinite;
+  transform-origin: center center;
+}
+
+.mandala-bottom {
+  width: 480px;
+  right: -130px;
+  bottom: -140px;
+  opacity: 0.62;
+  animation: spin-ccw 90s linear infinite;
+  transform-origin: center center;
+}
+
+/* ─── Card styles ───────────────────────────────────── */
+.gold-card {
+  background: rgba(255,253,248,.88);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 12px 28px rgba(184,134,60,.09);
+  border-radius: 15px;
+}
+.gold-card:hover {
+  box-shadow: 0 16px 34px rgba(184,134,60,.14);
+}
+.gold-top  { border-top: 3px solid var(--gold-accent); }
+
+/* ─── Typography helpers ─────────────────────────────── */
+.soft-label {
+  color: var(--text-muted);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+/* ─── Button styles ─────────────────────────────────── */
+.gold-button {
+  background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-primary) 100%);
+  color: white;
+  border-radius: 9px;
+  font-weight: 800;
+  box-shadow: 0 8px 16px rgba(212,175,55,.18);
+}
+.gold-button:hover { opacity: 0.90; }
+
+.outline-button {
+  border: 1px solid var(--gold-accent);
+  color: var(--gold-primary);
+  border-radius: 9px;
+  font-weight: 800;
+}
+.outline-button:hover { background: rgba(201,151,75,.10); }
+
+/* ─── Scrollbar ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(232,217,188,0.4); }
+::-webkit-scrollbar-thumb { background: #B8863C; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #9a6f30; }

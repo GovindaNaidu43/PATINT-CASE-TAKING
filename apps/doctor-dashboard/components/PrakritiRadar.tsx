@@ -19,15 +19,15 @@ export default function PrakritiRadar({ data }: { data: any }) {
       <div className="w-full h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
-            <PolarGrid stroke="#1A1535" />
-            <PolarAngleAxis dataKey="subject" tick={{ fill: '#C9A84C', fontSize: 14, fontFamily: 'Cinzel' }} />
+            <PolarGrid stroke="#E8D9BC" />
+            <PolarAngleAxis dataKey="subject" tick={{ fill: '#B8863C', fontSize: 14, fontFamily: 'Cinzel' }} />
             <Radar
               name="Prakriti"
               dataKey="A"
-              stroke="#C9A84C"
+              stroke="#B8863C"
               strokeWidth={2}
-              fill="#C9A84C"
-              fillOpacity={0.3}
+              fill="#B8863C"
+              fillOpacity={0.20}
             />
           </RadarChart>
         </ResponsiveContainer>

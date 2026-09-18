@@ -1,28 +1,20 @@
-import { Bell, Shield } from 'lucide-react'
+import { Bell, Search, Shield } from 'lucide-react'
 
 export default function TopBar() {
   return (
-    <div className="h-16 bg-royal-bg border-b border-royal-gold/30 flex items-center justify-between px-6 flex-shrink-0">
-      <div className="text-royal-ivory/80 font-semibold">
-        Physician Dashboard
+    <div className="min-h-20 bg-[#FAF3E8]/75 border-b border-[#E8D9BC] flex items-center justify-between gap-5 px-5 md:px-8 flex-shrink-0">
+      <div>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-royal-ivory">Good morning, Dr. Priya</p>
+        <p className="text-xs text-[#8A745A] mt-0.5">Here is your care overview for today.</p>
       </div>
-      
-      <div className="flex items-center gap-2 bg-success/10 text-success px-3 py-1.5 rounded-full text-sm font-semibold border border-success/30">
-        <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-        Kiosk Online
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="relative cursor-pointer text-royal-ivory hover:text-royal-gold transition-colors">
-          <Bell size={20} />
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-royal-crimson rounded-full text-[10px] flex items-center justify-center font-bold">
-            3
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-royal-ivory/80">
+      <div className="flex items-center gap-3 md:gap-6">
+        <div className="hidden sm:flex items-center gap-2 w-52 lg:w-64 px-3 py-2 rounded-full border border-[#D9C39C] bg-[#FFFDF8]/75 text-[#8A745A]"><Search size={16} /><span className="text-sm">Search patients...</span></div>
+        <div className="relative cursor-pointer text-royal-gold"><Bell size={20} /><div className="absolute -top-1 -right-1 w-4 h-4 bg-royal-crimson text-white rounded-full text-[10px] flex items-center justify-center font-bold" style={{ boxShadow: '0 0 6px rgba(167,104,93,0.50)' }}>3</div></div>
+        <div className="hidden md:flex items-center gap-2 text-royal-ivory/80">
           <Shield size={16} className="text-royal-gold" />
-          <span className="text-sm font-semibold hover:text-royal-gold cursor-pointer transition-colors">ABHA Linked</span>
+          <span className="text-xs font-bold text-[#8A745A]">ABHA Linked</span>
         </div>
+        <div className="w-10 h-10 rounded-full border-2 border-royal-gold bg-[#E8D9BC] text-royal-gold font-display text-lg font-bold flex items-center justify-center">PS</div>
       </div>
     </div>
   )

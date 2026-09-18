@@ -10,19 +10,34 @@ interface Props {
   className?: string;
 }
 
-const RoyalButton: React.FC<Props> = ({ variant = 'primary', size = 'lg', children, onClick, disabled = false, className = '' }) => {
-  const baseStyle = "rounded-lg font-display tracking-wide uppercase font-bold transition-colors flex justify-center items-center";
-  
+const RoyalButton: React.FC<Props> = ({
+  variant = 'primary',
+  size = 'lg',
+  children,
+  onClick,
+  disabled = false,
+  className = '',
+}) => {
+  const baseStyle =
+    'rounded-xl font-display tracking-wide uppercase font-bold transition-all flex justify-center items-center';
+
   const sizeStyles = {
-    sm: "px-4 py-2 text-sm min-w-[100px]",
-    md: "px-6 py-3 text-base min-w-[140px]",
-    lg: "px-8 py-4 text-lg min-w-[180px] min-h-[56px]"
+    sm: 'px-4 py-2 text-sm min-w-[100px]',
+    md: 'px-6 py-3 text-base min-w-[140px]',
+    lg: 'px-8 py-4 text-lg min-w-[180px] min-h-[56px]',
   };
 
   const variantStyles = {
-    primary: "bg-royal-gold text-royal-bg hover:bg-[#b3923a] shadow-gold-glow",
-    secondary: "bg-transparent border-2 border-royal-gold text-royal-gold hover:bg-royal-gold/10",
-    danger: "bg-royal-crimson text-white hover:bg-[#6b1414]"
+    primary:
+      'text-white shadow-gold-glow hover:opacity-90',
+    secondary:
+      'bg-transparent border-2 border-royal-gold text-royal-gold hover:bg-royal-gold/10',
+    danger:
+      'bg-royal-crimson text-white hover:opacity-90',
+  };
+
+  const primaryBg = {
+    background: 'linear-gradient(135deg, #C9974B 0%, #B8863C 100%)',
   };
 
   return (
@@ -31,7 +46,10 @@ const RoyalButton: React.FC<Props> = ({ variant = 'primary', size = 'lg', childr
       whileHover={disabled ? undefined : { scale: 1.02 }}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyle} ${sizeStyles[size]} ${variantStyles[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      style={variant === 'primary' ? primaryBg : undefined}
+      className={`${baseStyle} ${sizeStyles[size]} ${variantStyles[variant]} ${
+        disabled ? 'opacity-40 cursor-not-allowed' : ''
+      } ${className}`}
     >
       {children}
     </motion.button>

@@ -4,19 +4,73 @@ import { motion } from 'framer-motion';
 const LoadingMandala: React.FC<{ size?: number; label?: string }> = ({ size = 64, label }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      <motion.svg
-        animate={{ rotate: 360 }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        width={size}
-        height={size}
-        viewBox="0 0 100 100"
-        className="text-royal-gold drop-shadow-gold-glow"
-      >
-        <path fill="currentColor" d="M50 0 C60 30 70 40 100 50 C70 60 60 70 50 100 C40 70 30 60 0 50 C30 40 40 30 50 0 Z" opacity="0.8" />
-        <path fill="currentColor" d="M15 15 C35 35 45 45 85 15 C65 35 55 45 85 85 C65 65 55 55 15 85 C35 65 45 55 15 15 Z" opacity="0.5" />
-        <circle cx="50" cy="50" r="10" fill="currentColor" />
-      </motion.svg>
-      {label && <span className="text-royal-gold font-display animate-pulse">{label}</span>}
+      {/* Outer ring — slow clockwise */}
+      <div className="relative" style={{ width: size, height: size }}>
+        <motion.svg
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }}
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+        >
+          {/* Outer petals */}
+          {Array.from({ length: 8 }).map((_, i) => {
+            const angle = (i * 45 * Math.PI) / 180;
+            const x = 50 + 44 * Math.cos(angle);
+            const y = 50 + 44 * Math.sin(angle);
+            const cx1 = 50 + 34 * Math.cos(angle - 0.35);
+            const cy1 = 50 + 34 * Math.sin(angle - 0.35);
+            const cx2 = 50 + 34 * Math.cos(angle + 0.35);
+            const cy2 = 50 + 34 * Math.sin(angle + 0.35);
+            return (
+              <path
+                key={i}
+                d={`M50,50 C${cx1},${cy1} ${cx2},${cy2} ${x},${y} Z`}
+                fill="#B8863C" opacity="0.75"
+              />
+            );
+          })}
+          <circle cx="50" cy="50" r="44" stroke="#B8863C" strokeWidth="1.5" fill="none" opacity="0.4" />
+        </motion.svg>
+
+        {/* Inner ring — slow counter-clockwise */}
+        <motion.svg
+          animate={{ rotate: -360 }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }}
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+        >
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i * 30 * Math.PI) / 180;
+            return (
+              <circle
+                key={i}
+                cx={50 + 28 * Math.cos(angle)}
+                cy={50 + 28 * Math.sin(angle)}
+                r="3"
+                fill="#C9974B"
+                opacity="0.7"
+              />
+            );
+          })}
+          <circle cx="50" cy="50" r="28" stroke="#C9974B" strokeWidth="1" fill="none" opacity="0.5" />
+        </motion.svg>
+
+        {/* Centre dot */}
+        <svg style={{ position: 'absolute', inset: 0 }} width={size} height={size} viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="8" fill="#B8863C" opacity="0.9" />
+          <circle cx="50" cy="50" r="4" fill="#FAF3E8" />
+        </svg>
+      </div>
+
+      {label && (
+        <span className="font-display animate-pulse" style={{ color: '#B8863C' }}>
+          {label}
+        </span>
+      )}
     </div>
   );
 };

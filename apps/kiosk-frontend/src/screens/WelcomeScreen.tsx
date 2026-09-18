@@ -11,7 +11,7 @@ const WelcomeScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center relative">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
@@ -20,21 +20,28 @@ const WelcomeScreen: React.FC = () => {
         <div className="mb-12">
           <LoadingMandala size={160} />
         </div>
-        
-        <h1 className="text-7xl font-bold font-display bg-gradient-to-r from-royal-gold via-[#FFF2C8] to-royal-gold bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(201,168,76,0.3)] mb-6">
+
+        <h1 className="text-7xl font-bold font-display mb-6"
+            style={{
+              background: 'linear-gradient(135deg, #8A5C1A 0%, #C9974B 50%, #8A5C1A 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 2px 12px rgba(184,134,60,0.20))',
+            }}>
           {t('welcome.title')}
         </h1>
-        
-        <p className="text-2xl text-royal-ivory font-display tracking-widest uppercase mb-20 opacity-80">
+
+        <p className="text-2xl font-display tracking-widest uppercase mb-20"
+           style={{ color: '#8A745A' }}>
           {t('welcome.subtitle')}
         </p>
 
         <motion.div
           animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <RoyalButton 
-            size="lg" 
+          <RoyalButton
+            size="lg"
             onClick={() => navigate('/identify')}
             className="!px-16 !py-6 text-2xl"
           >
@@ -43,7 +50,8 @@ const WelcomeScreen: React.FC = () => {
         </motion.div>
       </motion.div>
 
-      <div className="absolute bottom-12 text-sm text-gray-500 font-display tracking-widest uppercase">
+      <div className="absolute bottom-12 text-sm font-display tracking-widest uppercase"
+           style={{ color: '#B8A090' }}>
         {t('welcome.footer')}
       </div>
     </div>

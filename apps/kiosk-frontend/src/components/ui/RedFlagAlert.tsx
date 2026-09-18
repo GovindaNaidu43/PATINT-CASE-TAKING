@@ -16,13 +16,26 @@ const RedFlagAlert: React.FC<Props> = ({ flags }) => {
           className="absolute top-20 right-8 z-50 flex flex-col gap-2 max-w-sm"
         >
           {flags.map((flag, i) => (
-            <div key={i} className="bg-royal-crimson/90 backdrop-blur-sm border border-red-400 text-white p-4 rounded-lg shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+            <div
+              key={i}
+              className="backdrop-blur-sm p-4 rounded-lg"
+              style={{
+                background: 'rgba(167,104,93,0.92)',
+                border: '1px solid rgba(220,100,80,0.60)',
+                boxShadow: '0 0 20px rgba(167,104,93,0.40)',
+                color: '#fff',
+              }}
+            >
               <div className="flex items-start gap-3">
                 <span className="text-2xl animate-pulse">⚠</span>
                 <div>
-                  <h4 className="font-bold font-display uppercase tracking-wider text-sm mb-1">Priority Alert</h4>
+                  <h4 className="font-bold font-display uppercase tracking-wider text-sm mb-1">
+                    Priority Alert
+                  </h4>
                   <p className="text-sm">{flag}</p>
-                  <p className="text-xs text-red-200 mt-2 italic">Notifying staff...</p>
+                  <p className="text-xs mt-2 italic" style={{ color: 'rgba(255,220,210,0.85)' }}>
+                    Notifying staff...
+                  </p>
                 </div>
               </div>
             </div>
