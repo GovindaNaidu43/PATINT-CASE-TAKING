@@ -1,0 +1,48 @@
+{
+  "welcome": {
+    "title": "",
+    "subtitle": "",
+    "cta": "",
+    "footer": ""
+  },
+  "identify": {
+    "title": "",
+    "scanHeading": "",
+    "manualHeading": "",
+    "continue": ""
+  },
+  "consent": {
+    "title": "",
+    "proceed": "",
+    "note": "",
+    "item1": { "title": "", "desc": "" },
+    "item2": { "title": "", "desc": "" },
+    "item3": { "title": "", "desc": "" },
+    "item4": { "title": "", "desc": "" }
+  },
+  "converse": {
+    "nurseName": "",
+    "hint": "",
+    "done": ""
+  },
+  "scan": {
+    "title": "",
+    "warning": "",
+    "confirm": "",
+    "reject": ""
+  },
+  "jihva": {
+    "title": "",
+    "hint": "",
+    "capture": "",
+    "continue": ""
+  },
+  "summary": {
+    "title": "",
+    "done": "",
+    "sent": ""
+  },
+  "signal": {
+    "prefix": ""
+  }
+}

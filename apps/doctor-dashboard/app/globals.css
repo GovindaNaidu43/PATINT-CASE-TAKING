@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-royal-bg text-royal-ivory font-sans;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-royal-bg;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-royal-gold rounded-full;
+}
