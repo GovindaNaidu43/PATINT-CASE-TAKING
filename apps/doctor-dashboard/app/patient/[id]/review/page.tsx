@@ -1,5 +1,4 @@
 'use client'
-import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { usePatient } from '@/lib/usePatient'
 import { useConfirm } from '@/lib/useConfirm'
@@ -16,6 +15,14 @@ export default function ReviewPage() {
 
   if (isLoading || !patient) return <div className="p-8 text-center text-royal-gold font-display text-xl">Loading...</div>
 
+  const summary = {
+    chiefComplaint: patient.turns.find(turn => turn.answer_key === 'presenting_complaint')?.text || 'No chief complaint recorded.',
+    hpi: patient.turns.map(turn => turn.text).join('\n'),
+    medicalHistory: 'Review the documented consultation history below.',
+    jihvaSummary: 'No tongue analysis summary recorded.',
+    sources: { chiefComplaint: 'conversation', hpi: 'conversation', medicalHistory: 'conversation', jihva: 'kiosk-vision' },
+  }
+
   return (
     <div className="min-h-screen bg-royal-bg p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -24,17 +31,17 @@ export default function ReviewPage() {
             <button onClick={() => router.back()} className="text-royal-ivory/60 hover:text-royal-gold mb-2 text-sm">
               ← Back to Dashboard
             </button>
-            <h1 className="font-display text-3xl text-royal-gold">Clinical Review: {patient.name}</h1>
+            <h1 className="font-display text-3xl text-royal-gold">Clinical Review: {patient.patient.name}</h1>
           </div>
           <div className="text-right">
-            <div className="text-royal-ivory text-lg">{patient.age}y {patient.sex}</div>
-            <div className="text-royal-ivory/60 text-sm">ABHA: {patient.abha}</div>
+            <div className="text-royal-ivory text-lg">{patient.patient.age ?? '—'}y {patient.patient.gender ?? ''}</div>
+            <div className="text-royal-ivory/60 text-sm">ABHA: {patient.patient.abha_id ?? 'Not linked'}</div>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 lg:w-[65%]">
-            <SummaryReviewPanel summary={patient.summary} onUpdate={() => {}} onAcknowledge={() => {}} />
+            <SummaryReviewPanel summary={summary} onUpdate={() => {}} onAcknowledge={() => {}} />
           </div>
           
           <div className="lg:w-[35%] space-y-6">
@@ -60,9 +67,9 @@ export default function ReviewPage() {
               </div>
             </RoyalCard>
 
-            <JihvaPreview signal={patient.jihvaSignal} />
+            <JihvaPreview />
 
-            <PhysicianConfirmGate onConfirm={confirm} isConfirmed={isConfirmed || patient.physicianConfirmed} />
+            <PhysicianConfirmGate onConfirm={confirm} isConfirmed={isConfirmed} />
           </div>
         </div>
       </div>

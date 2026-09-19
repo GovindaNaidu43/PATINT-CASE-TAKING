@@ -22,6 +22,11 @@ export const createConsultation = async (patientId: string) => {
   return response.data;
 };
 
+export const getConsultation = async (consultationId: string) => {
+  const response = await apiClient.get(`/consultations/${encodeURIComponent(consultationId)}`);
+  return response.data;
+};
+
 export const submitDialogueTurn = async (consultationId: string, text: string, modality: 'voice' | 'touch' | 'text', language: 'en' | 'hi' = 'en') => {
   const response = await apiClient.post(`/dialogue/turn?consultation_id=${encodeURIComponent(consultationId)}`, {
     text,
@@ -37,6 +42,15 @@ export const submitSession = async (_sessionData: unknown) => {
 
 export const grantConsent = async (consultationId: string, language: 'en' | 'hi', purposes: Array<'care' | 'voice_biomarker' | 'jihva_image' | 'followup'>) => {
   const response = await apiClient.post('/patients/consents', { consultation_id: consultationId, language, purposes });
+  return response.data;
+};
+
+export const ingestDocument = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await apiClient.post('/documents/ingest', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return response.data;
 };
 

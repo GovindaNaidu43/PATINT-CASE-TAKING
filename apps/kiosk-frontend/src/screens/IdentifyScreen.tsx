@@ -72,15 +72,45 @@ const IdentifyScreen: React.FC = () => {
               {lookupError && <p className="mt-4 text-warning text-sm">{lookupError}</p>}
               {lookupError && (
                 <div className="mt-4 space-y-3">
-                  <input value={newPatientName} onChange={event => setNewPatientName(event.target.value)} placeholder="Patient full name" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <input value={newPatientName} onChange={event => setNewPatientName(event.target.value)} placeholder="Patient full name"
+                    className="w-full rounded-xl p-4 outline-none transition-all"
+                    style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}
+                    onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                    onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+                  />
                   <div className="grid grid-cols-2 gap-3">
-                    <input type="number" min="0" max="130" value={newPatientAge} onChange={event => setNewPatientAge(event.target.value)} placeholder="Age" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
-                    <select value={newPatientGender} onChange={event => setNewPatientGender(event.target.value)} className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white"><option value="">Gender</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
+                    <input type="number" min="0" max="130" value={newPatientAge} onChange={event => setNewPatientAge(event.target.value)} placeholder="Age"
+                      className="w-full rounded-xl p-4 outline-none transition-all"
+                      style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}
+                      onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                      onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+                    />
+                    <select value={newPatientGender} onChange={event => setNewPatientGender(event.target.value)}
+                      className="w-full rounded-xl p-4 outline-none transition-all"
+                      style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}>
+                      <option value="">Gender</option>
+                      <option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option>
+                    </select>
                   </div>
-                  <input value={newPatientContact} onChange={event => setNewPatientContact(event.target.value)} placeholder="Contact number (optional)" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <input value={newPatientContact} onChange={event => setNewPatientContact(event.target.value)} placeholder="Contact number (optional)"
+                    className="w-full rounded-xl p-4 outline-none transition-all"
+                    style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}
+                    onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                    onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+                  />
                   <div className="grid grid-cols-2 gap-3">
-                    <input value={newPatientBloodGroup} onChange={event => setNewPatientBloodGroup(event.target.value)} placeholder="Blood group" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
-                    <input value={newPatientOccupation} onChange={event => setNewPatientOccupation(event.target.value)} placeholder="Occupation" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                    <input value={newPatientBloodGroup} onChange={event => setNewPatientBloodGroup(event.target.value)} placeholder="Blood group"
+                      className="w-full rounded-xl p-4 outline-none transition-all"
+                      style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}
+                      onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                      onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+                    />
+                    <input value={newPatientOccupation} onChange={event => setNewPatientOccupation(event.target.value)} placeholder="Occupation"
+                      className="w-full rounded-xl p-4 outline-none transition-all"
+                      style={{ background: 'rgba(255,253,248,0.90)', border: '1.5px solid #E8D9BC', color: '#3E2E1E' }}
+                      onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                      onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+                    />
                   </div>
                   <RoyalButton disabled={!newPatientName.trim()} className="w-full" onClick={async () => {
                     const created = await createPatient({ name: newPatientName.trim(), age: newPatientAge ? Number(newPatientAge) : undefined, gender: newPatientGender || undefined, contact: newPatientContact || undefined, blood_group: newPatientBloodGroup || undefined, occupation: newPatientOccupation || undefined, abha_id: manualId, consent_granted: false });

@@ -1,12 +1,10 @@
 import useSWR from 'swr'
-import { mockPatientRecord } from './mockPatientRecord'
+import { getConsultation, type ConsultationDetail } from './apiClient'
 
-export function usePatient(id: string) {
-  const fetcher = async () => {
-    return new Promise<typeof mockPatientRecord>((resolve) => {
-      setTimeout(() => resolve(mockPatientRecord), 500)
-    })
-  }
-  
-  return useSWR(`api/patient/${id}`, fetcher)
+export function usePatient(consultationId: string) {
+  return useSWR<ConsultationDetail>(
+    consultationId ? `consultation/${consultationId}` : null,
+    () => getConsultation(consultationId),
+    { refreshInterval: 30_000 }  // re-fetch every 30 s for live status
+  )
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/patient_data.dart';
 import '../services/mock_patient_service.dart';
+import '../services/api_patient_service.dart' as api;
 import '../theme/medikiosk_theme.dart';
 import '../widgets/mandala_background.dart';
 import '../widgets/royal_components.dart';
@@ -18,6 +19,8 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
   bool _adherence = true;
   bool _newRedFlags = false;
   bool _submitted = false;
+  bool _submitting = false;
+  Map<String, dynamic>? _apiResult;
 
   @override
   Widget build(BuildContext context) {
@@ -165,17 +168,38 @@ class _FollowUpScreenState extends State<FollowUpScreen> {
                 const SizedBox(height: 16),
 
                 RoyalButton(
-                  label: _submitted ? 'Recorded ✓' : 'Submit Check-In',
-                  onPressed: _submitted
+                  label: _submitting ? 'Sending…' : (_submitted ? 'Recorded ✓' : 'Submit Check-In'),
+                  onPressed: (_submitted || _submitting)
                       ? null
-                      : () {
-                          setState(() => _submitted = true);
+                      : () async {
+                          setState(() => _submitting = true);
+                          // Build a plain-text summary of the patient's response
+                          final feeling = ['Worse', 'Same', 'Better'][_digestionFeeling ?? 1];
+                          final summaryText =
+                              'Digestion: $feeling. Adherence: ${_adherence ? 'Yes' : 'No'}. '
+                              'New symptoms: ${_newRedFlags ? 'Yes - urgent' : 'None'}.';
+                          try {
+                            final result = await api.submitFollowUpResponse(summaryText);
+                            setState(() {
+                              _submitted = true;
+                              _apiResult = result;
+                              _submitting = false;
+                            });
+                          } catch (_) {
+                            setState(() {
+                              _submitted = true;
+                              _submitting = false;
+                            });
+                          }
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
                                 _newRedFlags
                                     ? 'Red flag recorded. Hospital triage alerted.'
-                                    : 'Follow-up successfully recorded into your ABDM health timeline.',
+                                    : (_apiResult != null
+                                        ? 'Assessment: ${_apiResult!['assessment'] ?? 'Follow-up recorded.'}'
+                                        : 'Follow-up successfully recorded.'),
                               ),
                               backgroundColor:
                                   _newRedFlags ? MediKioskTheme.royalCrimson : MediKioskTheme.royalGold,

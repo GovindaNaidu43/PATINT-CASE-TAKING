@@ -93,7 +93,20 @@ const ConverseScreen: React.FC = () => {
           )}
           {!isDone && questionKey !== 'severity' && (
             <form className="flex gap-3 mb-4" onSubmit={event => { event.preventDefault(); void handleAnswer(input, 'touch'); setInput(''); }}>
-              <input value={input} onChange={event => setInput(event.target.value)} placeholder="Type your answer" disabled={isSubmitting} className="flex-1 bg-royal-surface border border-royal-gold/40 rounded-xl px-5 py-4 text-white outline-none" />
+              <input
+                value={input}
+                onChange={event => setInput(event.target.value)}
+                placeholder="Type your answer…"
+                disabled={isSubmitting}
+                className="flex-1 rounded-xl px-5 py-4 outline-none transition-all"
+                style={{
+                  background: 'rgba(255,253,248,0.90)',
+                  border: '1.5px solid #E8D9BC',
+                  color: '#3E2E1E',
+                }}
+                onFocus={e => (e.target.style.borderColor = '#B8863C')}
+                onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
+              />
               <RoyalButton type="submit" disabled={isSubmitting || !input.trim()} size="lg">Send</RoyalButton>
             </form>
           )}
