@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import StepProgress from '../components/ui/StepProgress';
 import MandalaBackground from '../components/ui/MandalaBackground';
 
@@ -13,9 +13,19 @@ const routesToSteps: Record<string, number> = {
 };
 
 const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location  = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const isWelcome = location.pathname === '/';
   const currentStep = routesToSteps[location.pathname] || 0;
+
+  const nextRoute = [
+    '/identify',
+    '/consent',
+    '/converse',
+    '/scan',
+    '/jihva',
+    '/summary',
+  ].find((route, index) => index === currentStep);
 
   const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
@@ -46,7 +56,18 @@ const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               MediKiosk
             </span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2 rounded-full border border-[#E8D9BC] bg-[#FFFDF9]/70 px-2 py-1">
+              {['/consent', '/converse', '/scan', '/jihva', '/summary'].map(path => (
+                <Link
+                  key={path}
+                  to={path}
+                  className="text-[10px] font-semibold uppercase tracking-[0.12em] px-2 py-1 rounded-full text-royal-muted hover:text-royal-gold transition-colors"
+                >
+                  {path.replace('/', '')}
+                </Link>
+              ))}
+            </div>
             <Link
               to="/diagnostics"
               className="text-xs font-semibold px-3 py-1 rounded-full border border-royal-border text-royal-muted hover:text-royal-gold transition-colors"
@@ -68,7 +89,7 @@ const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       )}
 
       {/* ── Main Content ── */}
-      <main className="flex-1 overflow-hidden z-10 relative flex flex-col">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden z-10 relative flex flex-col custom-scrollbar">
         {children}
       </main>
 
@@ -80,7 +101,26 @@ const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   backdropFilter: 'blur(14px)',
                   borderTop: '1px solid rgba(184,134,60,0.20)',
                 }}>
-          <StepProgress currentStep={currentStep} />
+          <div className="flex items-center justify-between w-full max-w-4xl gap-4">
+            <div className="flex-1 min-w-0">
+              <StepProgress currentStep={currentStep} />
+            </div>
+            {nextRoute && (
+              <button
+                type="button"
+                onClick={() => navigate(nextRoute)}
+                className="ml-2 shrink-0 rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8863C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF5EB]"
+                style={{
+                  borderColor: '#B8863C',
+                  color: '#B8863C',
+                  background: 'rgba(255,253,248,0.85)',
+                }}
+                aria-label="Skip to next workflow feature"
+              >
+                Skip ahead
+              </button>
+            )}
+          </div>
         </footer>
       )}
     </div>

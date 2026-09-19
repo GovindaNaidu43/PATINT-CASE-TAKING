@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-royal-bg text-royal-ivory font-sans antialiased overflow-hidden select-none;
+    @apply bg-royal-bg text-royal-ivory font-sans antialiased select-none;
+    overflow: hidden;
     background-image:
       radial-gradient(ellipse at 85% 10%, rgba(240, 222, 192, 0.70), transparent 32%),
       radial-gradient(ellipse at 95% 90%, rgba(201, 151, 75, 0.55), transparent 38%),
@@ -12,27 +17,41 @@
       linear-gradient(160deg, #FBF5EB 0%, #F5E8D0 50%, #EDDBBC 100%);
   }
 
+  #root {
+    height: 100vh;
+    width: 100vw;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-wide;
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(184, 134, 60, 0.9) rgba(232, 217, 188, 0.35);
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(232, 217, 188, 0.5);
-  border-radius: 4px;
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #B8863C;
-  border-radius: 4px;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(232, 217, 188, 0.25);
+  border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #9a6f30;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c9994d 0%, #b8863c 100%);
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d3a75c 0%, #a8762b 100%);
+}
+
+* {
+  scrollbar-gutter: stable;
 }

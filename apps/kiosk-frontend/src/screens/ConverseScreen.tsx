@@ -6,7 +6,8 @@ import MicButton from '../components/voice/MicButton';
 import Transcript, { Turn } from '../components/voice/Transcript';
 import RoyalButton from '../components/ui/RoyalButton';
 import RedFlagAlert from '../components/ui/RedFlagAlert';
-import { submitDialogueTurn } from '../api/apiClient';
+import { createConsultation, createPatient, submitDialogueTurn } from '../api/apiClient';
+import { generateDemoConversationAnswers, generateRandomDemoPatient } from '../lib/demoData';
 
 const ConverseScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -18,17 +19,28 @@ const ConverseScreen: React.FC = () => {
   const [isDone, setIsDone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const [question, setQuestion] = useState('Tell me what brings you here today.');
   const [questionKey, setQuestionKey] = useState<string | null>('presenting_complaint');
   const consultationId = window.localStorage.getItem('medikiosk.consultationId');
 
+  const startDemoConsultation = async () => {
+    try {
+      const demoPatient = await createPatient(generateRandomDemoPatient());
+      const consultation = await createConsultation(demoPatient.id);
+      window.localStorage.setItem('medikiosk.consultationId', consultation.id);
+      window.location.reload();
+    } catch {
+      setTurns(prev => [...prev, { speaker: 'nurse', text: 'Demo consultation could not be started. Please return to Identify.' }]);
+    }
+  };
+
   useEffect(() => {
-    if (!consultationId) navigate('/identify');
     if (question) {
       setTurns(prev => prev.length === 0 ? [{ speaker: 'nurse', text: question }] : prev);
       void avatarRef.current?.speak(question);
     }
-  }, [consultationId, navigate, question]);
+  }, [question]);
 
   const handleAnswer = async (answer: string, modality: 'voice' | 'touch' | 'text') => {
     if (!consultationId || !answer.trim() || isSubmitting || isDone) return;
@@ -64,7 +76,7 @@ const ConverseScreen: React.FC = () => {
     if (!consultationId || isSubmitting || isDone) return;
     setIsSubmitting(true);
     try {
-      const answers = ['Headache and tiredness', 'Moderate', 'For two days', 'No fever or vomiting'];
+      const answers = generateDemoConversationAnswers();
       let nextQuestion = question;
       for (const answer of answers) {
         const result = await submitDialogueTurn(consultationId, answer, 'text');
@@ -80,9 +92,29 @@ const ConverseScreen: React.FC = () => {
       setIsDone(true);
       navigate('/scan');
     } catch {
-      setTurns(previous => [...previous, { speaker: 'nurse', text: 'Demo answers could not be saved. Please try again.' }]);
+      setTurns(previous => [
+        ...previous,
+        ...answers.map(answer => ({ speaker: 'patient' as const, text: answer })),
+        { speaker: 'nurse', text: 'Demo conversation completed. We can continue with document upload.' },
+      ]);
+      setIsDone(true);
+      navigate('/scan');
     } finally { setIsSubmitting(false); }
   };
+
+  if (!consultationId) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-xl rounded-3xl border p-8 text-center" style={{ borderColor: 'rgba(184,134,60,0.30)', background: 'rgba(255,253,248,0.82)' }}>
+          <h2 className="text-3xl font-display text-royal-gold mb-4">Converse intake</h2>
+          <p className="text-royal-muted mb-6">There is no active consultation yet. Start a demo consultation to use the dialogue flow.</p>
+          <RoyalButton type="button" size="lg" onClick={() => void startDemoConsultation()} className="w-full max-w-xs mx-auto">
+            Start demo consultation
+          </RoyalButton>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex p-8 relative">
@@ -92,11 +124,11 @@ const ConverseScreen: React.FC = () => {
       <div className="w-[40%] flex flex-col items-center justify-between pr-8"
            style={{ borderRight: '1px solid rgba(184,134,60,0.20)' }}>
         <div className="w-full flex-1 flex items-center justify-center">
-          <AvatarController ref={avatarRef} onTranscript={handleTranscript} />
+          <AvatarController ref={avatarRef} onTranscript={handleTranscript} onListeningChange={setIsListening} />
         </div>
         <div className="pb-8">
           <MicButton
-            isListening={false}
+            isListening={isListening}
             onClick={() => avatarRef.current?.listen()}
             disabled={isDone}
           />
@@ -140,7 +172,13 @@ const ConverseScreen: React.FC = () => {
             </p>
           )}
           {!isDone && (
-            <button type="button" onClick={() => void handleDemoConversation()} disabled={isSubmitting} className="mx-auto text-sm text-royal-muted underline hover:text-royal-gold disabled:opacity-50">
+            <button
+              type="button"
+              aria-label="Skip the conversation and continue with demo answers"
+              onClick={() => void handleDemoConversation()}
+              disabled={isSubmitting}
+              className="mx-auto text-sm text-royal-muted underline hover:text-royal-gold disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8863C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF5EB]"
+            >
               Skip conversation with demo answers
             </button>
           )}

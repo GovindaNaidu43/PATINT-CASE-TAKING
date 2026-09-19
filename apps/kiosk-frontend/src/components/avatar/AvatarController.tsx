@@ -13,9 +13,10 @@ export interface AvatarControllerRef {
 interface Props {
   onTranscript: (text: string) => void;
   initialMessage?: string;
+  onListeningChange?: (isListening: boolean) => void;
 }
 
-const AvatarController = forwardRef<AvatarControllerRef, Props>(({ onTranscript, initialMessage }, ref) => {
+const AvatarController = forwardRef<AvatarControllerRef, Props>(({ onTranscript, initialMessage, onListeningChange }, ref) => {
   const [state, setState] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
   const [message, setMessage] = useState(initialMessage || '');
   
@@ -43,11 +44,12 @@ const AvatarController = forwardRef<AvatarControllerRef, Props>(({ onTranscript,
   }));
 
   useEffect(() => {
+    onListeningChange?.(isListening);
     if (state === 'listening' && !isListening && transcript) {
       setState('processing');
       onTranscript(transcript);
     }
-  }, [isListening, transcript, state, onTranscript]);
+  }, [isListening, transcript, state, onTranscript, onListeningChange]);
 
   return (
     <div className="flex flex-col items-center">

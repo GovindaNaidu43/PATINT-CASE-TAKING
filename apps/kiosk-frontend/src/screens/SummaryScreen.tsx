@@ -31,16 +31,16 @@ const SummaryScreen: React.FC = () => {
   const [consultation, setConsultation] = useState<ConsultationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const consultationId = window.localStorage.getItem('medikiosk.consultationId');
   const jihvaSkipped = window.localStorage.getItem('medikiosk.jihvaSkipped') === 'true';
 
   useEffect(() => {
-    const consultationId = window.localStorage.getItem('medikiosk.consultationId');
     if (!consultationId) { setLoading(false); setError('No active consultation found.'); return; }
     getConsultation(consultationId)
       .then(data => setConsultation(data as ConsultationData))
       .catch(() => setError('Could not load consultation summary.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [consultationId]);
 
   // Build a readable chief complaint from the first patient turn
   const patientTurns = consultation?.turns.filter(t => t.answer_key) ?? [];
@@ -53,6 +53,20 @@ const SummaryScreen: React.FC = () => {
       <p className="text-royal-muted text-lg">Loading consultation summary…</p>
     </div>
   );
+
+  if (!consultationId) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-xl rounded-3xl border p-8 text-center" style={{ borderColor: 'rgba(184,134,60,0.30)', background: 'rgba(255,253,248,0.82)' }}>
+          <h2 className="text-3xl font-display text-royal-gold mb-4">Summary</h2>
+          <p className="text-royal-muted mb-6">This summary page is available as a standalone workflow step. Start a demo consultation to view the case summary.</p>
+          <RoyalButton type="button" size="lg" onClick={() => navigate('/identify')} className="w-full max-w-xs mx-auto">
+            Go to identify
+          </RoyalButton>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
@@ -171,17 +185,22 @@ const SummaryScreen: React.FC = () => {
 
       <div className="px-6 py-4 rounded-xl flex items-center gap-4 mb-8"
         style={{ background: 'rgba(140,163,131,0.15)', border: '1px solid #8CA383', color: '#5A7A55' }}>
-        <span className="text-2xl">✓</span>
+        <span className="text-2xl" aria-hidden="true">✓</span>
         <span className="font-bold">{t('summary.sent')}</span>
       </div>
 
-      <RoyalButton size="lg" onClick={() => {
-        window.localStorage.removeItem('medikiosk.consultationId');
-        window.localStorage.removeItem('medikiosk.jihvaSkipped');
-        navigate('/');
-      }} className="w-64">
-        {t('summary.done')}
-      </RoyalButton>
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center">
+        <RoyalButton type="button" aria-label="Return to identify screen" variant="secondary" onClick={() => navigate('/identify')} className="flex-1">
+          Back to identify
+        </RoyalButton>
+        <RoyalButton type="button" aria-label="Finish consultation and return to home" size="lg" onClick={() => {
+          window.localStorage.removeItem('medikiosk.consultationId');
+          window.localStorage.removeItem('medikiosk.jihvaSkipped');
+          navigate('/');
+        }} className="flex-1">
+          {t('summary.done')}
+        </RoyalButton>
+      </div>
     </div>
   );
 };

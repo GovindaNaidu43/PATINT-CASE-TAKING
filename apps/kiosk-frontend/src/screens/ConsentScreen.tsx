@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import RoyalCard from '../components/ui/RoyalCard';
 import RoyalButton from '../components/ui/RoyalButton';
+import { createConsultation, createPatient, grantConsent } from '../api/apiClient';
+import { generateRandomDemoPatient } from '../lib/demoData';
 import { useTTS } from '../voice/useTTS';
-import { grantConsent } from '../api/apiClient';
 
 const ConsentScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -29,9 +30,23 @@ const ConsentScreen: React.FC = () => {
 
   const allAccepted = consents.every(Boolean);
 
+  const startDemoConsultation = async () => {
+    try {
+      const demoPatient = await createPatient(generateRandomDemoPatient());
+      const consultation = await createConsultation(demoPatient.id);
+      window.localStorage.setItem('medikiosk.consultationId', consultation.id);
+      navigate('/converse');
+    } catch {
+      window.alert('Demo consultation could not be created. Please start from Identify and retry.');
+    }
+  };
+
   const continueWithDemoConsent = async () => {
     const consultationId = window.localStorage.getItem('medikiosk.consultationId');
-    if (!consultationId) return navigate('/identify');
+    if (!consultationId) {
+      await startDemoConsultation();
+      return;
+    }
     setSubmitting(true);
     try {
       await grantConsent(consultationId, 'en', ['care', 'voice_biomarker', 'jihva_image', 'followup']);
@@ -89,7 +104,10 @@ const ConsentScreen: React.FC = () => {
           size="lg"
           onClick={async () => {
             const consultationId = window.localStorage.getItem('medikiosk.consultationId');
-            if (!consultationId) return navigate('/identify');
+            if (!consultationId) {
+              await startDemoConsultation();
+              return;
+            }
             setSubmitting(true);
             try {
               await grantConsent(consultationId, 'en', ['care', 'voice_biomarker', 'jihva_image', 'followup']);
