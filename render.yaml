@@ -1,8 +1,51 @@
 services:
   - type: web
+    name: medikiosk-api
+    runtime: python
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --app-dir services/api-gateway --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: MOCK_EXTERNAL_SERVICES
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: KIOSK_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+
+  - type: web
     name: medikiosk-kiosk
     runtime: node
     rootDir: apps/kiosk-frontend
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_URL
+        sync: false
+      - key: KIOSK_API_KEY
+        sync: false
+
+  - type: web
+    name: medikiosk-doctor-dashboard
+    runtime: node
+    rootDir: apps/doctor-dashboard
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_KEYCLOAK_ISSUER
+        sync: false
+      - key: NEXT_PUBLIC_KEYCLOAK_CLIENT_ID
+        value: medikiosk-api

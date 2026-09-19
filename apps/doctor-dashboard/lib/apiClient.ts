@@ -6,7 +6,7 @@
  */
 import axios from 'axios'
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 /** Retrieve the stored auth token (set after Keycloak login). */
 function getToken(): string | null {
