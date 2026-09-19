@@ -4,10 +4,20 @@ from pathlib import Path
 
 DEFAULT_DATABASE_URL = f"sqlite:///{(Path(__file__).resolve().parent / 'medikiosk.db').as_posix()}"
 
+def get_database_url() -> str:
+    database_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL).strip()
+    if database_url.startswith("postgres://"):
+        database_url = "postgresql+psycopg://" + database_url.removeprefix("postgres://")
+    elif database_url.startswith("postgresql://"):
+        database_url = "postgresql+psycopg://" + database_url.removeprefix("postgresql://")
+    if "@host/" in database_url or "@postgres/" in database_url and os.getenv("ENVIRONMENT") == "production":
+        raise ValueError("DATABASE_URL still contains a placeholder host; copy the Internal Database URL from Render Postgres")
+    return database_url
+
 @dataclass(frozen=True)
 class Settings:
     environment: str = os.getenv("ENVIRONMENT", "development")
-    database_url: str = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+    database_url: str = get_database_url()
     mock_external_services: bool = os.getenv("MOCK_EXTERNAL_SERVICES", "true").lower() == "true"
     abdm_base_url: str = os.getenv("ABDM_BASE_URL", "https://sandbox.abdm.gov.in")
     allowed_origins: tuple[str, ...] = tuple(filter(None, os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")))

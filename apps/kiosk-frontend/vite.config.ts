@@ -17,4 +17,7 @@ export default defineConfig({
       allow: ['..', '../../packages'],
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+  },
 });
