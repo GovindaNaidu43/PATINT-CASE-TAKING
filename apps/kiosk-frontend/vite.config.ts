@@ -9,6 +9,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@packages': path.resolve(__dirname, '../../packages'),
+    },
+  },
+  server: {
+    fs: {
+      allow: ['..', '../../packages'],
     },
   },
 });

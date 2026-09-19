@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import StepProgress from '../components/ui/StepProgress';
 import MandalaBackground from '../components/ui/MandalaBackground';
 
@@ -47,6 +47,20 @@ const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </span>
           </div>
           <div className="flex items-center gap-6">
+            <Link
+              to="/diagnostics"
+              className="text-xs font-semibold px-3 py-1 rounded-full border border-royal-border text-royal-muted hover:text-royal-gold transition-colors"
+            >
+              Diagnostics
+            </Link>
+            <a
+              href="http://localhost:3000/dashboard"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden md:inline-flex text-xs font-semibold px-3 py-1 rounded-full border border-royal-border text-royal-gold hover:bg-[#F0DEC0]/50 transition-colors"
+            >
+              Doctor Portal ↗
+            </a>
             <span className="text-sm text-royal-muted">Ministry of AYUSH</span>
             <span className="text-royal-gold font-bold font-display">{time}</span>
           </div>
