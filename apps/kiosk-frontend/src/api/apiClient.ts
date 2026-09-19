@@ -40,6 +40,20 @@ export const grantConsent = async (consultationId: string, language: 'en' | 'hi'
   return response.data;
 };
 
+export const requestAbhaOtp = async (abhaAddress: string) => (await apiClient.post('/abdm/abha/request-otp', { abha_address: abhaAddress })).data;
+export const confirmAbhaOtp = async (transactionId: string, otp: string) => (await apiClient.post('/abdm/abha/confirm-otp', { transaction_id: transactionId, otp })).data;
+export const synthesizeSpeech = async (text: string, language = 'hi') => (await apiClient.post('/speech/tts', { text, language })).data;
+export const speechToText = async (audioBase64: string, language = 'hi') => (await apiClient.post('/api/ai/asr', { audio_base64: audioBase64, language })).data;
+export const translateText = async (text: string, sourceLang: string, targetLang: string) => (await apiClient.post('/api/ai/translate', { text, source_lang: sourceLang, target_lang: targetLang })).data;
+export const transliterateText = async (text: string, targetLang = 'hi') => (await apiClient.post('/api/ai/transliterate', { text, target_lang: targetLang })).data;
+export const extractLmmc = async (narrative: string, language = 'hi') => (await apiClient.post('/api/ai/lmmc', { narrative, language })).data;
+export const analyzeJihva = async (consultationId: string, image: Blob) => {
+  const form = new FormData();
+  form.append('consultation_id', consultationId);
+  form.append('image', image, 'jihva-capture.jpg');
+  return (await apiClient.post('/signals/jihva', form, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
+};
+
 export const getOCRResult = async (_documentId: string) => {
   return { success: true };
 };

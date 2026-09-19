@@ -18,6 +18,15 @@ def require_kiosk(x_kiosk_key: str | None = None) -> str:
 async def kiosk_identity(x_kiosk_key: str | None = Header(default=None, alias="X-Kiosk-Key")) -> str:
     return require_kiosk(x_kiosk_key)
 
+def ai_identity(
+    x_kiosk_key: str | None = Header(default=None, alias="X-Kiosk-Key"),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+) -> str | dict:
+    """Allow AI calls from a trusted kiosk or an authenticated clinic staff member."""
+    if x_kiosk_key is not None:
+        return require_kiosk(x_kiosk_key)
+    return require_staff(credentials)
+
 @lru_cache(maxsize=1)
 def jwks_client() -> jwt.PyJWKClient:
     if not settings.keycloak_issuer:
