@@ -6,13 +6,14 @@ import QRScanner from '../components/ui/QRScanner';
 import RoyalCard from '../components/ui/RoyalCard';
 import RoyalButton from '../components/ui/RoyalButton';
 import { createConsultation, createPatient, getPatient } from '../api/apiClient';
+import { dummyLoginCredentials, generateRandomDemoPatient } from '../lib/demoData';
 
 const IdentifyScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [patient, setPatient] = useState<any>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [manualId, setManualId] = useState('');
+  const [manualId, setManualId] = useState(dummyLoginCredentials.abha);
   const [newPatientName, setNewPatientName] = useState('');
   const [newPatientAge, setNewPatientAge] = useState('');
   const [newPatientGender, setNewPatientGender] = useState('');
@@ -26,19 +27,11 @@ const IdentifyScreen: React.FC = () => {
     setDemoLoading(true);
     setLookupError('');
     try {
-      const names = ['Ananya Sharma', 'Rohan Mehta', 'Meera Iyer', 'Vikram Nair'];
-      const occupations = ['Teacher', 'Engineer', 'Designer', 'Consultant'];
-      const index = Math.floor(Math.random() * names.length);
-      const demoPatient = await createPatient({
-        name: names[index],
-        age: 24 + Math.floor(Math.random() * 42),
-        gender: index % 2 === 0 ? 'Female' : 'Male',
-        contact: `90000${String(10000 + Math.floor(Math.random() * 89999))}`,
-        blood_group: ['A+', 'B+', 'O+', 'AB+'][index],
-        occupation: occupations[index],
-        abha_id: `91-DEMO-${Date.now()}`,
-        consent_granted: false,
-      });
+      const demoPatientPayload = {
+        ...generateRandomDemoPatient(),
+        abha_id: manualId.trim() || dummyLoginCredentials.abha,
+      };
+      const demoPatient = await createPatient(demoPatientPayload);
       const consultation = await createConsultation(demoPatient.id);
       window.localStorage.setItem('medikiosk.consultationId', consultation.id);
       navigate('/consent');
@@ -47,6 +40,17 @@ const IdentifyScreen: React.FC = () => {
     } finally {
       setDemoLoading(false);
     }
+  };
+
+  const loadDummyCredentials = () => {
+    setManualId(dummyLoginCredentials.abha);
+    setNewPatientName('Demo Presentation Patient');
+    setNewPatientAge('32');
+    setNewPatientGender('Female');
+    setNewPatientContact('9876543210');
+    setNewPatientBloodGroup('O+');
+    setNewPatientOccupation('Teacher');
+    setLookupError('Demo credentials loaded. Press “Find local record” or continue with the demo patient flow.');
   };
 
   const handleScan = async (abhaId: string) => {
@@ -96,6 +100,13 @@ const IdentifyScreen: React.FC = () => {
               />
               <RoyalButton variant="secondary" className="w-full" onClick={handleManualSubmit}>
                 Find local record
+              </RoyalButton>
+              <div className="mt-3 rounded-xl border border-royal-gold/30 bg-royal-ivory/5 px-4 py-3 text-sm text-royal-muted">
+                <div><span className="font-semibold text-royal-gold">Demo ABHA:</span> {dummyLoginCredentials.abha}</div>
+                <div><span className="font-semibold text-royal-gold">Demo ABHI:</span> {dummyLoginCredentials.abhi}</div>
+              </div>
+              <RoyalButton variant="secondary" className="w-full mt-3" onClick={loadDummyCredentials}>
+                Use dummy ABHA + ABHI credentials
               </RoyalButton>
               <RoyalButton variant="secondary" className="w-full mt-3" disabled={demoLoading} onClick={() => void startDemoPatient()}>
                 {demoLoading ? 'Preparing demo patient...' : 'Use random demo patient'}
