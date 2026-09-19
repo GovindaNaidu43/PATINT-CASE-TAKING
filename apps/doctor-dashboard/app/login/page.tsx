@@ -1,6 +1,6 @@
 'use client'
 import RoyalCard from '@/components/RoyalCard'
-function base64Url(bytes: Uint8Array) { return btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '') }
+function base64Url(bytes: Uint8Array) { return btoa(String.fromCharCode(...Array.from(bytes))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '') }
 export default function LoginPage() {
   const signIn = async () => {
     const issuer = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER; const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'medikiosk-api'

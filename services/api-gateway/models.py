@@ -32,6 +32,8 @@ class ConsentRecord(Base):
     language: Mapped[str] = mapped_column(String(10))
     granted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    audio_sha256: Mapped[str | None] = mapped_column(String, nullable=True)
+    wording_version: Mapped[str] = mapped_column(String, default="v1")
 class AuditEvent(Base):
     __tablename__ = "audit_events"
     id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -48,6 +50,8 @@ class SummaryDraft(Base):
     content: Mapped[str] = mapped_column(Text)
     sources: Mapped[list] = mapped_column(JSON)
     physician_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+    released_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    released_by: Mapped[str | None] = mapped_column(String, nullable=True)
 
 class Prescription(Base):
     __tablename__ = "prescriptions"
@@ -72,4 +76,50 @@ class FollowUp(Base):
     destination: Mapped[str] = mapped_column(String)
     due_at: Mapped[datetime] = mapped_column(DateTime)
     status: Mapped[str] = mapped_column(String, default="scheduled")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Document(Base):
+    __tablename__ = "documents"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
+    consultation_id: Mapped[str] = mapped_column(ForeignKey("consultations.id"), index=True)
+    filename: Mapped[str] = mapped_column(String)
+    raw_text: Mapped[str] = mapped_column(Text)
+    entities: Mapped[dict] = mapped_column(JSON, default=dict)
+    status: Mapped[str] = mapped_column(String, default="pending_review")
+    reviewed_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class SupportingSignal(Base):
+    __tablename__ = "supporting_signals"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    consultation_id: Mapped[str] = mapped_column(ForeignKey("consultations.id"), index=True)
+    kind: Mapped[str] = mapped_column(String)
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    consent_id: Mapped[str | None] = mapped_column(ForeignKey("consent_records.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class FollowUpAttempt(Base):
+    __tablename__ = "followup_attempts"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    followup_id: Mapped[str] = mapped_column(ForeignKey("followups.id"), index=True)
+    status: Mapped[str] = mapped_column(String)
+    provider: Mapped[str] = mapped_column(String)
+    provider_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class BiometricProfile(Base):
+    __tablename__ = "biometric_profiles"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    subject: Mapped[str] = mapped_column(String, unique=True, index=True)
+    encrypted_template: Mapped[str] = mapped_column(Text)
+    nonce: Mapped[str] = mapped_column(String)
+    salt: Mapped[str] = mapped_column(String)
+    recovery_key_hash: Mapped[str] = mapped_column(String)
+    failed_attempts: Mapped[int] = mapped_column(default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    consented_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -25,6 +26,7 @@ def release(draft_id: str, _: dict = Depends(require_physician), db: Session = D
     draft = db.get(SummaryDraft, draft_id)
     if not draft: raise HTTPException(404, "Summary draft not found")
     if not draft.physician_confirmed: raise HTTPException(409, "Physician confirmation is required before release")
+    draft.released_at = datetime.utcnow(); draft.released_by = _.get("preferred_username") or _.get("sub") or "physician"; db.commit()
     return {"status": "released", "draft_id": draft_id}
 
 def summary_response(draft: SummaryDraft) -> dict:
