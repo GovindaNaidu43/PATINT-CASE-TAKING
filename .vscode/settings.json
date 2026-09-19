@@ -1,0 +1,9 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "npm run build": true,
+        "/^git add apps/doctor-dashboard/app/auth/callback/page\\.tsx apps/doctor-dashboard/app/dashboard/page\\.tsx apps/kiosk-frontend/src/screens/JihvaScreen\\.tsx; git status --short; git diff --cached --check; git diff --name-only --diff-filter=U$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
