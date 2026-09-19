@@ -1,63 +1,71 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import StepProgress from '../components/ui/StepProgress';
+import MandalaBackground from '../components/ui/MandalaBackground';
 
 const routesToSteps: Record<string, number> = {
   '/identify': 1,
-  '/consent': 2,
+  '/consent':  2,
   '/converse': 3,
-  '/scan': 4,
-  '/jihva': 5,
-  '/summary': 6,
+  '/scan':     4,
+  '/jihva':    5,
+  '/summary':  6,
 };
 
 const KioskLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
+  const location  = useLocation();
   const isWelcome = location.pathname === '/';
   const currentStep = routesToSteps[location.pathname] || 0;
-  
+
   const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="h-screen w-screen bg-royal-bg text-royal-ivory overflow-hidden flex flex-col relative font-sans">
-      {/* Decorative Mandalas */}
-      <div className="absolute top-0 left-0 w-64 h-64 opacity-10 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full fill-royal-gold">
-           <circle cx="50" cy="50" r="40" strokeWidth="2" stroke="currentColor" fill="none"/>
-           <path d="M50 10 L50 90 M10 50 L90 50 M22 22 L78 78 M22 78 L78 22" stroke="currentColor" strokeWidth="2"/>
-        </svg>
-      </div>
-      <div className="absolute bottom-0 right-0 w-64 h-64 opacity-10 pointer-events-none transform rotate-45">
-        <svg viewBox="0 0 100 100" className="w-full h-full fill-royal-gold">
-           <circle cx="50" cy="50" r="40" strokeWidth="2" stroke="currentColor" fill="none"/>
-           <path d="M50 10 L50 90 M10 50 L90 50 M22 22 L78 78 M22 78 L78 22" stroke="currentColor" strokeWidth="2"/>
-        </svg>
-      </div>
+    <div className="h-screen w-screen overflow-hidden flex flex-col relative font-sans"
+         style={{ background: 'transparent' }}>
 
-      {/* Top Bar */}
+      {/* ── Animated mandala watercolor background ── */}
+      <MandalaBackground />
+
+      {/* ── Top Bar ── */}
       {!isWelcome && (
-        <header className="h-16 flex items-center justify-between px-8 border-b border-royal-gold/20 bg-royal-surface/80 backdrop-blur-md z-10">
+        <header className="h-16 flex items-center justify-between px-8 z-10 relative"
+                style={{
+                  background: 'rgba(255,253,248,0.80)',
+                  backdropFilter: 'blur(14px)',
+                  borderBottom: '1px solid rgba(184,134,60,0.20)',
+                }}>
           <div className="flex items-center gap-3">
-            <svg className="w-8 h-8 text-royal-gold" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C9 5 5 8 5 13C5 17 8 21 12 22C16 21 19 17 19 13C19 8 15 5 12 2Z" opacity="0.8"/>
+            {/* Lotus icon */}
+            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3C10 7 6 9 6 14C6 18 8.5 21 12 22C15.5 21 18 18 18 14C18 9 14 7 12 3Z"
+                    fill="#B8863C" opacity="0.85"/>
+              <path d="M12 14C11 12 8 11 6 14" stroke="#B8863C" strokeWidth="1.2" fill="none"/>
+              <path d="M12 14C13 12 16 11 18 14" stroke="#B8863C" strokeWidth="1.2" fill="none"/>
             </svg>
-            <span className="font-display font-bold text-xl tracking-wider text-royal-gold">MediKiosk</span>
+            <span className="font-display font-bold text-xl tracking-wider text-royal-gold">
+              MediKiosk
+            </span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="text-sm opacity-80">Ministry of AYUSH</span>
+            <span className="text-sm text-royal-muted">Ministry of AYUSH</span>
             <span className="text-royal-gold font-bold font-display">{time}</span>
           </div>
         </header>
       )}
 
-      {/* Main Content */}
+      {/* ── Main Content ── */}
       <main className="flex-1 overflow-hidden z-10 relative flex flex-col">
         {children}
       </main>
 
-      {/* Bottom Bar (Progress) */}
+      {/* ── Bottom Progress Bar ── */}
       {!isWelcome && (
-        <footer className="h-20 border-t border-royal-gold/20 bg-royal-surface/80 backdrop-blur-md z-10 flex items-center justify-center px-8">
+        <footer className="h-20 z-10 relative flex items-center justify-center px-8"
+                style={{
+                  background: 'rgba(255,253,248,0.80)',
+                  backdropFilter: 'blur(14px)',
+                  borderTop: '1px solid rgba(184,134,60,0.20)',
+                }}>
           <StepProgress currentStep={currentStep} />
         </footer>
       )}

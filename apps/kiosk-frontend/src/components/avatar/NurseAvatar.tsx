@@ -36,9 +36,10 @@ const NurseAvatar: React.FC<Props> = ({ state }) => {
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
         {/* Shoulders / Coat */}
-        <path d="M40 300 C40 220 160 220 160 300 Z" fill="#2DD4BF" opacity="0.3" />
-        <path d="M50 300 C50 240 150 240 150 300 Z" fill="#1A1535" stroke="#C9A84C" strokeWidth="2" />
-        <path d="M90 300 L90 250 L110 250 L110 300 Z" fill="#F5ECD7" />
+        <path d="M40 300 C40 220 160 220 160 300 Z" fill="#8CA383" opacity="0.3" />
+        <path d="M50 300 C50 240 150 240 150 300 Z" fill="#2C1F12" stroke="#B8863C" strokeWidth="2" />
+        <path d="M90 300 L90 250 L110 250 L110 300 Z" fill="#FAF3E8" />
+
         
         {/* Neck */}
         <rect x="90" y="150" width="20" height="40" fill="#E6B87D" />
@@ -83,8 +84,8 @@ const NurseAvatar: React.FC<Props> = ({ state }) => {
         )}
         
         {/* Stethoscope */}
-        <path d="M70 240 C70 280 130 280 130 240" fill="none" stroke="#555" strokeWidth="4" />
-        <circle cx="130" cy="240" r="10" fill="#C9A84C" />
+        <path d="M70 240 C70 280 130 280 130 240" fill="none" stroke="#8A745A" strokeWidth="4" />
+        <circle cx="130" cy="240" r="10" fill="#B8863C" />
       </motion.svg>
     </div>
   );

@@ -7,7 +7,14 @@ interface Props {
 
 const SignalBadge: React.FC<Props> = ({ label, className = '' }) => {
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-royal-teal/10 border border-royal-teal text-royal-teal text-sm font-bold ${className}`}>
+    <div
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold ${className}`}
+      style={{
+        background: 'rgba(140,163,131,0.15)',
+        border: '1px solid #8CA383',
+        color: '#5A7A55',
+      }}
+    >
       <span className="animate-pulse">⚡</span>
       <span>Supporting Signal — Not a Diagnosis{label ? ` · ${label}` : ''}</span>
     </div>

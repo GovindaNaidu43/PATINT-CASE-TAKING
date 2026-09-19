@@ -12,7 +12,8 @@ export default function FollowUpLog({ log }: { log: any }) {
           <div className="text-sm text-royal-ivory/60 mt-1">ABHA: {log.abha} | Last Visit: {log.lastVisit}</div>
         </div>
         {isEscalated && (
-          <div className="bg-royal-crimson text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(139,26,26,0.5)]">
+          <div className="bg-royal-crimson text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+               style={{ boxShadow: '0 0 10px rgba(167,104,93,0.35)' }}>
             <AlertTriangle size={14} /> Escalated
           </div>
         )}
@@ -20,22 +21,26 @@ export default function FollowUpLog({ log }: { log: any }) {
 
       <div className="space-y-4">
         {log.log.map((entry: any, i: number) => (
-          <div key={i} className={`p-4 rounded border ${entry.escalated ? 'bg-royal-crimson/10 border-royal-crimson/30' : 'bg-royal-surface/50 border-royal-surface'}`}>
+          <div key={i} className={`p-4 rounded border`}
+               style={{
+                 background: entry.escalated ? 'rgba(167,104,93,0.08)' : 'rgba(232,217,188,0.30)',
+                 borderColor: entry.escalated ? 'rgba(167,104,93,0.30)' : '#E8D9BC',
+               }}>
             <div className="flex justify-between mb-2">
-              <div className="flex items-center gap-2 text-sm text-royal-ivory/80">
-                {entry.method === 'IVR' ? <Phone size={14} className="text-royal-gold" /> : <MessageSquare size={14} className="text-royal-teal" />}
+              <div className="flex items-center gap-2 text-sm" style={{ color: '#5A4030' }}>
+                {entry.method === 'IVR' ? <Phone size={14} className="text-royal-gold" /> : <MessageSquare size={14} style={{ color: '#8CA383' }} />}
                 <span className="font-bold">{entry.method} Check-in</span>
-                <span className="text-royal-ivory/40 ml-2">{entry.date}</span>
+                <span className="ml-2" style={{ color: '#A89070' }}>{entry.date}</span>
               </div>
               <div className="text-lg" title={`Sentiment: ${entry.sentiment}`}>
                 {entry.sentiment === 'positive' ? '😊' : entry.sentiment === 'neutral' ? '😐' : '😟'}
               </div>
             </div>
-            <div className="text-sm text-royal-ivory">
+            <div className="text-sm" style={{ color: '#3E2E1E' }}>
               {entry.summary}
             </div>
             {entry.escalated && (
-              <div className="mt-2 text-xs font-bold text-royal-crimson">
+              <div className="mt-2 text-xs font-bold" style={{ color: '#A7685D' }}>
                 Reason: {entry.escalationReason}
               </div>
             )}

@@ -49,7 +49,7 @@ const ConverseScreen: React.FC = () => {
         setTurns(prev => [...prev, { speaker: 'nurse', text: result.next_question }]);
         await avatarRef.current?.speak(result.next_question);
       }
-    } catch {
+      } catch {
       setTurns(prev => [...prev, { speaker: 'nurse', text: 'I could not save that response. Please try again.' }]);
     } finally {
       setIsSubmitting(false);
@@ -63,20 +63,17 @@ const ConverseScreen: React.FC = () => {
   return (
     <div className="flex-1 flex p-8 relative">
       <RedFlagAlert flags={redFlags} />
-      
+
       {/* LEFT PANEL */}
-      <div className="w-[40%] flex flex-col items-center justify-between border-r border-royal-gold/20 pr-8">
+      <div className="w-[40%] flex flex-col items-center justify-between pr-8"
+           style={{ borderRight: '1px solid rgba(184,134,60,0.20)' }}>
         <div className="w-full flex-1 flex items-center justify-center">
-          <AvatarController 
-            ref={avatarRef} 
-            onTranscript={handleTranscript}
-          />
+          <AvatarController ref={avatarRef} onTranscript={handleTranscript} />
         </div>
-        
         <div className="pb-8">
-          <MicButton 
-            isListening={false} // Managed by AvatarController internally but we can trigger it
-            onClick={() => avatarRef.current?.listen()} 
+          <MicButton
+            isListening={false}
+            onClick={() => avatarRef.current?.listen()}
             disabled={isDone}
           />
         </div>
@@ -101,10 +98,11 @@ const ConverseScreen: React.FC = () => {
             </form>
           )}
           {!isDone && (
-            <p className="text-center text-gray-400 text-sm italic mb-8">{t('converse.hint')}</p>
+            <p className="text-center text-sm italic mb-8" style={{ color: '#A89070' }}>
+              {t('converse.hint')}
+            </p>
           )}
         </div>
-        
         <div className="mt-auto">
           <Transcript turns={turns} />
         </div>
