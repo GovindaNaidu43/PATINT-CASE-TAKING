@@ -16,6 +16,17 @@ export default defineConfig({
     fs: {
       allow: ['..', '../../packages'],
     },
+    proxy: {
+      '/api': {
+        target: process.env.API_URL || 'http://localhost:8000',
+        rewrite: (requestPath) => requestPath.replace(/^\/api/, '') || '/',
+        configure: (proxy) => {
+          proxy.on('proxyReq', (request) => {
+            request.setHeader('X-Kiosk-Key', process.env.KIOSK_API_KEY || 'local-development-kiosk-key');
+          });
+        },
+      },
+    },
   },
   build: {
     chunkSizeWarningLimit: 600,
