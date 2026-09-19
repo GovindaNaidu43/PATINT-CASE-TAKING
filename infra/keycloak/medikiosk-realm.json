@@ -1,0 +1,18 @@
+{
+  "realm": "medikiosk",
+  "enabled": true,
+  "displayName": "MediKiosk Clinic",
+  "roles": { "realm": [{ "name": "physician" }, { "name": "clinic_admin" }] },
+  "clients": [{
+    "clientId": "medikiosk-api",
+    "enabled": true,
+    "publicClient": true,
+    "protocol": "openid-connect",
+    "standardFlowEnabled": true,
+    "directAccessGrantsEnabled": false,
+    "redirectUris": ["http://localhost:3000/*"],
+    "webOrigins": ["http://localhost:3000"],
+    "attributes": { "pkce.code.challenge.method": "S256" },
+    "protocolMappers": [{ "name": "api-audience", "protocol": "openid-connect", "protocolMapper": "oidc-audience-mapper", "config": { "included.client.audience": "medikiosk-api", "access.token.claim": "true", "id.token.claim": "true" } }]
+  }]
+}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import RoyalCard from '../components/ui/RoyalCard';
 import RoyalButton from '../components/ui/RoyalButton';
 import { useTTS } from '../voice/useTTS';
+import { grantConsent } from '../api/apiClient';
 
 const ConsentScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const ConsentScreen: React.FC = () => {
   const { speak, isSpeaking } = useTTS();
 
   const [consents, setConsents] = useState([false, false, false, false]);
+  const [submitting, setSubmitting] = useState(false);
 
   const toggleConsent = (index: number) => {
     const newConsents = [...consents];
@@ -75,8 +77,16 @@ const ConsentScreen: React.FC = () => {
         <p className="text-royal-muted text-sm mb-6">{t('consent.note')}</p>
         <RoyalButton
           size="lg"
-          disabled={!allAccepted}
-          onClick={() => navigate('/converse')}
+          onClick={async () => {
+            const consultationId = window.localStorage.getItem('medikiosk.consultationId');
+            if (!consultationId) return navigate('/identify');
+            setSubmitting(true);
+            try {
+              await grantConsent(consultationId, 'en', ['care', 'voice_biomarker', 'jihva_image', 'followup']);
+              navigate('/converse');
+            } finally { setSubmitting(false); }
+          }}
+          disabled={!allAccepted || submitting}
           className="w-full max-w-md mx-auto"
         >
           {t('consent.proceed')}

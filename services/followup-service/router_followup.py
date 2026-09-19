@@ -1,10 +1,27 @@
-from fastapi import APIRouter
+import uuid
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from tasks import schedule_followup, assess_response
+from sqlalchemy.orm import Session
+from database import get_db
+from models import AuditEvent, Consultation, FollowUp
+from security import require_staff
+from tasks import assess_response
 router = APIRouter(prefix="/followups", tags=["follow-up"])
 class Schedule(BaseModel): consultation_id: str; destination: str; hours: int = 24
 class Response(BaseModel): text: str
 @router.post("/schedule")
-def schedule(data: Schedule): return schedule_followup(data.consultation_id, data.destination, data.hours)
+def schedule(data: Schedule, staff: dict = Depends(require_staff), db: Session = Depends(get_db)):
+	if data.hours < 1 or data.hours > 8760: raise HTTPException(422, "Follow-up interval must be between 1 hour and 1 year")
+	consultation = db.get(Consultation, data.consultation_id)
+	if not consultation: raise HTTPException(404, "Consultation not found")
+	followup = FollowUp(id=str(uuid.uuid4()), consultation_id=consultation.id, patient_id=consultation.patient_id, destination=data.destination, due_at=datetime.utcnow() + timedelta(hours=data.hours))
+	actor = staff.get("preferred_username") or staff.get("sub") or "staff"
+	db.add(followup); db.add(AuditEvent(id=str(uuid.uuid4()), actor=actor, action="followup_scheduled", entity_type="consultation", entity_id=consultation.id, detail={"followup_id": followup.id})); db.commit(); db.refresh(followup)
+	return {"id": followup.id, "consultation_id": followup.consultation_id, "patient_id": followup.patient_id, "destination": followup.destination, "due_at": followup.due_at.isoformat(), "status": followup.status}
 @router.post("/response")
-def response(data: Response): return assess_response(data.text)
+def response(data: Response, _: dict = Depends(require_staff)): return assess_response(data.text)
+
+@router.get("/{consultation_id}")
+def list_followups(consultation_id: str, _: dict = Depends(require_staff), db: Session = Depends(get_db)):
+	return [{"id": item.id, "consultation_id": item.consultation_id, "patient_id": item.patient_id, "destination": item.destination, "due_at": item.due_at.isoformat(), "status": item.status} for item in db.query(FollowUp).filter(FollowUp.consultation_id == consultation_id).order_by(FollowUp.due_at.asc()).all()]

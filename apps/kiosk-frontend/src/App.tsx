@@ -7,6 +7,7 @@ import ConverseScreen from './screens/ConverseScreen';
 import ScanScreen from './screens/ScanScreen';
 import JihvaScreen from './screens/JihvaScreen';
 import SummaryScreen from './screens/SummaryScreen';
+import DiagnosticsScreen from './screens/DiagnosticsScreen';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/scan" element={<ScanScreen />} />
         <Route path="/jihva" element={<JihvaScreen />} />
         <Route path="/summary" element={<SummaryScreen />} />
+        <Route path="/diagnostics" element={<DiagnosticsScreen />} />
       </Routes>
     </KioskLayout>
   );

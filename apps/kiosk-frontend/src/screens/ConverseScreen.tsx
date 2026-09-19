@@ -6,47 +6,58 @@ import MicButton from '../components/voice/MicButton';
 import Transcript, { Turn } from '../components/voice/Transcript';
 import RoyalButton from '../components/ui/RoyalButton';
 import RedFlagAlert from '../components/ui/RedFlagAlert';
-import { QUESTION_TREE, RED_FLAG_RULES } from '../api/mockConversation';
+import { submitDialogueTurn } from '../api/apiClient';
 
 const ConverseScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const avatarRef = useRef<AvatarControllerRef>(null);
 
-  const [qIndex, setQIndex] = useState(0);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [redFlags, setRedFlags] = useState<string[]>([]);
   const [isDone, setIsDone] = useState(false);
-
-  const currentQ = QUESTION_TREE[qIndex];
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [input, setInput] = useState('');
+  const [question, setQuestion] = useState('Tell me what brings you here today.');
+  const [questionKey, setQuestionKey] = useState<string | null>('presenting_complaint');
+  const consultationId = window.localStorage.getItem('medikiosk.consultationId');
 
   useEffect(() => {
-    const startQ = async () => {
-      if (isDone) return;
-      if (currentQ) {
-        setTurns(prev => [...prev, { speaker: 'nurse', text: currentQ.question }]);
-        await avatarRef.current?.speak(currentQ.question);
-      } else {
+    if (!consultationId) navigate('/identify');
+    if (question) {
+      setTurns(prev => prev.length === 0 ? [{ speaker: 'nurse', text: question }] : prev);
+      void avatarRef.current?.speak(question);
+    }
+  }, [consultationId, navigate, question]);
+
+  const handleAnswer = async (answer: string, modality: 'voice' | 'touch' | 'text') => {
+    if (!consultationId || !answer.trim() || isSubmitting || isDone) return;
+    setIsSubmitting(true);
+    setTurns(prev => [...prev, { speaker: 'patient', text: answer }]);
+    try {
+      const result = await submitDialogueTurn(consultationId, answer, modality);
+      if (result.red_flags?.length) {
+        setRedFlags(prev => [...prev, ...result.red_flags.map((flag: { phrase: string; action: string }) => `${flag.phrase}: ${flag.action}`)]);
+      }
+      if (!result.next_question) {
         setIsDone(true);
         await avatarRef.current?.speak(t('converse.done'));
-        setTimeout(() => navigate('/scan'), 3000);
+        setTimeout(() => navigate('/scan'), 1500);
+      } else {
+        setQuestion(result.next_question);
+        setQuestionKey(result.question_key);
+        setTurns(prev => [...prev, { speaker: 'nurse', text: result.next_question }]);
+        await avatarRef.current?.speak(result.next_question);
       }
-    };
-    startQ();
-  }, [qIndex, isDone, navigate, t]);
+      } catch {
+      setTurns(prev => [...prev, { speaker: 'nurse', text: 'I could not save that response. Please try again.' }]);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  const handleAnswer = async (answer: string) => {
-    setTurns(prev => [...prev, { speaker: 'patient', text: answer }]);
-
-    const lowerAns = answer.toLowerCase();
-    const newFlags: string[] = [];
-    RED_FLAG_RULES.forEach(rule => {
-      if (rule.triggers.some(t => lowerAns.includes(t))) {
-        newFlags.push(rule.flag);
-      }
-    });
-    if (newFlags.length > 0) setRedFlags(prev => [...prev, ...newFlags]);
-    setQIndex(prev => prev + 1);
+  const handleTranscript = (text: string) => {
+    void handleAnswer(text, 'voice');
   };
 
   return (
@@ -57,7 +68,7 @@ const ConverseScreen: React.FC = () => {
       <div className="w-[40%] flex flex-col items-center justify-between pr-8"
            style={{ borderRight: '1px solid rgba(184,134,60,0.20)' }}>
         <div className="w-full flex-1 flex items-center justify-center">
-          <AvatarController ref={avatarRef} onTranscript={handleAnswer} />
+          <AvatarController ref={avatarRef} onTranscript={handleTranscript} />
         </div>
         <div className="pb-8">
           <MicButton
@@ -71,20 +82,20 @@ const ConverseScreen: React.FC = () => {
       {/* RIGHT PANEL */}
       <div className="w-[60%] flex flex-col pl-8">
         <div className="flex-1 flex flex-col justify-center">
-          {!isDone && currentQ && (
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {currentQ.options.map((opt, i) => (
-                <RoyalButton
-                  key={i}
-                  variant="secondary"
-                  size="lg"
-                  onClick={() => handleAnswer(opt)}
-                  className="!h-20 text-left justify-start px-6 whitespace-normal leading-tight"
-                >
-                  {opt}
+          {!isDone && questionKey === 'severity' && (
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              {Array.from({ length: 11 }, (_, value) => String(value)).map(value => (
+                <RoyalButton key={value} variant="secondary" size="lg" disabled={isSubmitting} onClick={() => void handleAnswer(value, 'touch')} className="!h-16">
+                  {value}
                 </RoyalButton>
               ))}
             </div>
+          )}
+          {!isDone && questionKey !== 'severity' && (
+            <form className="flex gap-3 mb-4" onSubmit={event => { event.preventDefault(); void handleAnswer(input, 'touch'); setInput(''); }}>
+              <input value={input} onChange={event => setInput(event.target.value)} placeholder="Type your answer" disabled={isSubmitting} className="flex-1 bg-royal-surface border border-royal-gold/40 rounded-xl px-5 py-4 text-white outline-none" />
+              <RoyalButton type="submit" disabled={isSubmitting || !input.trim()} size="lg">Send</RoyalButton>
+            </form>
           )}
           {!isDone && (
             <p className="text-center text-sm italic mb-8" style={{ color: '#A89070' }}>

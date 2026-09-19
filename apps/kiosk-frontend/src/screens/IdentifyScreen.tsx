@@ -5,23 +5,30 @@ import { useTranslation } from 'react-i18next';
 import QRScanner from '../components/ui/QRScanner';
 import RoyalCard from '../components/ui/RoyalCard';
 import RoyalButton from '../components/ui/RoyalButton';
-import { getPatient } from '../api/apiClient';
+import { createConsultation, createPatient, getPatient } from '../api/apiClient';
 
 const IdentifyScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [patient, setPatient] = useState<any>(null);
+  const [isStarting, setIsStarting] = useState(false);
   const [manualId, setManualId] = useState('');
+  const [newPatientName, setNewPatientName] = useState('');
+  const [newPatientAge, setNewPatientAge] = useState('');
+  const [newPatientGender, setNewPatientGender] = useState('');
+  const [newPatientContact, setNewPatientContact] = useState('');
+  const [newPatientBloodGroup, setNewPatientBloodGroup] = useState('');
+  const [newPatientOccupation, setNewPatientOccupation] = useState('');
+  const [lookupError, setLookupError] = useState('');
 
   const handleScan = async (abhaId: string) => {
-    const data = await getPatient(abhaId);
-    setPatient(data);
+    try { setPatient(await getPatient(abhaId)); setLookupError(''); }
+    catch { setManualId(abhaId); setLookupError('No local record was found. Register the patient below.'); }
   };
 
   const handleManualSubmit = async () => {
     if (manualId.length > 5) {
-      const data = await getPatient(manualId);
-      setPatient(data);
+      await handleScan(manualId);
     }
   };
 
@@ -60,8 +67,27 @@ const IdentifyScreen: React.FC = () => {
                 onBlur={e => (e.target.style.borderColor = '#E8D9BC')}
               />
               <RoyalButton variant="secondary" className="w-full" onClick={handleManualSubmit}>
-                Fetch via ABHA / OTP
+                Find local record
               </RoyalButton>
+              {lookupError && <p className="mt-4 text-warning text-sm">{lookupError}</p>}
+              {lookupError && (
+                <div className="mt-4 space-y-3">
+                  <input value={newPatientName} onChange={event => setNewPatientName(event.target.value)} placeholder="Patient full name" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="number" min="0" max="130" value={newPatientAge} onChange={event => setNewPatientAge(event.target.value)} placeholder="Age" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                    <select value={newPatientGender} onChange={event => setNewPatientGender(event.target.value)} className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white"><option value="">Gender</option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
+                  </div>
+                  <input value={newPatientContact} onChange={event => setNewPatientContact(event.target.value)} placeholder="Contact number (optional)" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input value={newPatientBloodGroup} onChange={event => setNewPatientBloodGroup(event.target.value)} placeholder="Blood group" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                    <input value={newPatientOccupation} onChange={event => setNewPatientOccupation(event.target.value)} placeholder="Occupation" className="w-full bg-royal-surface border border-royal-gold/40 rounded-xl p-4 text-white" />
+                  </div>
+                  <RoyalButton disabled={!newPatientName.trim()} className="w-full" onClick={async () => {
+                    const created = await createPatient({ name: newPatientName.trim(), age: newPatientAge ? Number(newPatientAge) : undefined, gender: newPatientGender || undefined, contact: newPatientContact || undefined, blood_group: newPatientBloodGroup || undefined, occupation: newPatientOccupation || undefined, abha_id: manualId, consent_granted: false });
+                    setPatient({ ...created, abha_id: manualId }); setLookupError('');
+                  }}>Register patient locally</RoyalButton>
+                </div>
+              )}
             </div>
           ) : (
             <motion.div
@@ -75,11 +101,18 @@ const IdentifyScreen: React.FC = () => {
                   <span className="text-4xl">👤</span>
                 </div>
                 <h3 className="text-3xl font-display text-royal-ivory mb-2">{patient.name}</h3>
-                <p className="text-royal-gold font-mono text-lg mb-4">ABHA: {patient.abhaId}</p>
-                <p className="text-royal-muted mb-10">
-                  {patient.age} years • {patient.gender === 'M' ? 'Male' : 'Female'}
-                </p>
-                <RoyalButton size="lg" className="w-full" onClick={() => navigate('/consent')}>
+                <p className="text-royal-gold font-mono text-lg mb-10">ABHA: {patient.abha_id || 'Not linked'}</p>
+                
+                <RoyalButton size="lg" className="w-full" disabled={isStarting} onClick={async () => {
+                  setIsStarting(true);
+                  try {
+                    const consultation = await createConsultation(patient.id);
+                    window.localStorage.setItem('medikiosk.consultationId', consultation.id);
+                    navigate('/consent');
+                  } finally {
+                    setIsStarting(false);
+                  }
+                }}>
                   {t('identify.continue')}
                 </RoyalButton>
               </RoyalCard>

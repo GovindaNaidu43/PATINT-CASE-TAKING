@@ -6,6 +6,7 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   onClick?: () => void;
+  type?: 'button' | 'submit';
   disabled?: boolean;
   className?: string;
 }
@@ -15,12 +16,12 @@ const RoyalButton: React.FC<Props> = ({
   size = 'lg',
   children,
   onClick,
+  type = 'button',
   disabled = false,
   className = '',
 }) => {
   const baseStyle =
     'rounded-xl font-display tracking-wide uppercase font-bold transition-all flex justify-center items-center';
-
   const sizeStyles = {
     sm: 'px-4 py-2 text-sm min-w-[100px]',
     md: 'px-6 py-3 text-base min-w-[140px]',
@@ -45,6 +46,7 @@ const RoyalButton: React.FC<Props> = ({
       whileTap={disabled ? undefined : { scale: 0.96 }}
       whileHover={disabled ? undefined : { scale: 1.02 }}
       onClick={onClick}
+      type={type}
       disabled={disabled}
       style={variant === 'primary' ? primaryBg : undefined}
       className={`${baseStyle} ${sizeStyles[size]} ${variantStyles[variant]} ${

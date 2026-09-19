@@ -4,17 +4,32 @@ services:
       context: ..
     command: uvicorn services.api-gateway.main:app --host 0.0.0.0 --port 8000
     ports: ["8000:8000"]
+    env_file: ../.env
     environment:
-      DATABASE_URL: postgresql://medikiosk:medikiosk@postgres/medikiosk
-      MOCK_EXTERNAL_SERVICES: "true"
-    depends_on: [postgres, redis, minio]
+      DATABASE_URL: postgresql+psycopg://medikiosk:${MEDIKIOSK_DB_PASSWORD:?set MEDIKIOSK_DB_PASSWORD}@postgres/medikiosk
+      MOCK_EXTERNAL_SERVICES: "false"
+      KIOSK_API_KEY: ${KIOSK_API_KEY:?set KIOSK_API_KEY}
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/medikiosk
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/medikiosk/protocol/openid-connect/certs
+      KEYCLOAK_AUDIENCE: medikiosk-api
+    depends_on: [postgres, redis, minio, keycloak]
   postgres:
     image: postgres:16-alpine
-    environment: { POSTGRES_USER: medikiosk, POSTGRES_PASSWORD: medikiosk, POSTGRES_DB: medikiosk }
+    environment: { POSTGRES_USER: medikiosk, POSTGRES_PASSWORD: ${MEDIKIOSK_DB_PASSWORD:?set MEDIKIOSK_DB_PASSWORD}, POSTGRES_DB: medikiosk }
   redis:
     image: redis:7-alpine
   minio:
     image: minio/minio
     command: server /data --console-address :9001
-    environment: { MINIO_ROOT_USER: minioadmin, MINIO_ROOT_PASSWORD: minioadmin }
+    environment: { MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?set MINIO_ACCESS_KEY}, MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?set MINIO_SECRET_KEY} }
     ports: ["9000:9000", "9001:9001"]
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KC_HOSTNAME: http://localhost:8080
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?set KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+    ports: ["8080:8080"]
