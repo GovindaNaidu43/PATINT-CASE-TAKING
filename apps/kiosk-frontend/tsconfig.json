@@ -18,9 +18,10 @@
     "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@packages/*": ["../../packages/*"]
     }
   },
-  "include": ["src", "electron"],
+  "include": ["src", "electron", "../../packages"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
