@@ -18,7 +18,7 @@ def queue(_: dict = Depends(require_staff), db: Session = Depends(get_db)):
     return [{
         "consultation_id": consultation.id, "patient_id": patient.id, "patient_name": patient.name,
         "status": consultation.status, "red_flag_count": len(consultation.red_flags or []),
-        "created_at": consultation.created_at.isoformat(),
+        "created_at": consultation.created_at.isoformat() if consultation.created_at else None,
     } for consultation, patient in rows]
 
 @router.get("/events")

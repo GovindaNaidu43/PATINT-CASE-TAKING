@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 HERE = Path(__file__).resolve().parent
 for directory in (HERE, HERE.parent / "dialogue-engine", HERE.parent / "ocr-ner-service", HERE.parent / "cv-jihva-service", HERE.parent / "voice-prakriti-service", HERE.parent / "summary-service", HERE.parent / "abdm-connector", HERE.parent / "followup-service", HERE.parent / "asr-tts-service"):
     sys.path.insert(0, str(directory))
-from database import Base, engine
+from database import Base, engine, migrate_sqlite_schema
 from router_patients import router as patients_router
 from router_consultations import router as consultations_router
 from router_dialogue import router as dialogue_router
@@ -23,6 +23,7 @@ from router_ai4bharat import router as ai4bharat_router
 from config import settings
 
 Base.metadata.create_all(bind=engine)
+migrate_sqlite_schema()
 app = FastAPI(title="MediKiosk", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,

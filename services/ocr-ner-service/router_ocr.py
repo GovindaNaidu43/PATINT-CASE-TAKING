@@ -22,6 +22,12 @@ async def ingest(file: UploadFile = File(...), consultation_id: str = Form(...),
 @router.get("/review-queue")
 def review_items(_: dict = Depends(require_staff), db: Session = Depends(get_db)): return {"items": [{"id": item.id, "consultation_id": item.consultation_id, "filename": item.filename, "entities": item.entities, "status": item.status, "created_at": item.created_at.isoformat()} for item in db.query(Document).filter(Document.status == "pending_review").order_by(Document.created_at.desc()).all()]}
 
+@router.get("/{document_id}")
+def get_document(document_id: str, _: str = Depends(kiosk_identity), db: Session = Depends(get_db)):
+    document = db.get(Document, document_id)
+    if not document: raise HTTPException(404, "Document not found")
+    return {"id": document.id, "consultation_id": document.consultation_id, "filename": document.filename, "text": document.raw_text, "entities": document.entities, "status": document.status}
+
 @router.post("/{document_id}/review")
 def review(document_id: str, decision: str = Form(...), staff: dict = Depends(require_staff), db: Session = Depends(get_db)):
     if decision not in {"accepted", "rejected"}: raise HTTPException(422, "Decision must be accepted or rejected")

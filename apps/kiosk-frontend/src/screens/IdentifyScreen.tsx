@@ -20,6 +20,34 @@ const IdentifyScreen: React.FC = () => {
   const [newPatientBloodGroup, setNewPatientBloodGroup] = useState('');
   const [newPatientOccupation, setNewPatientOccupation] = useState('');
   const [lookupError, setLookupError] = useState('');
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const startDemoPatient = async () => {
+    setDemoLoading(true);
+    setLookupError('');
+    try {
+      const names = ['Ananya Sharma', 'Rohan Mehta', 'Meera Iyer', 'Vikram Nair'];
+      const occupations = ['Teacher', 'Engineer', 'Designer', 'Consultant'];
+      const index = Math.floor(Math.random() * names.length);
+      const demoPatient = await createPatient({
+        name: names[index],
+        age: 24 + Math.floor(Math.random() * 42),
+        gender: index % 2 === 0 ? 'Female' : 'Male',
+        contact: `90000${String(10000 + Math.floor(Math.random() * 89999))}`,
+        blood_group: ['A+', 'B+', 'O+', 'AB+'][index],
+        occupation: occupations[index],
+        abha_id: `91-DEMO-${Date.now()}`,
+        consent_granted: false,
+      });
+      const consultation = await createConsultation(demoPatient.id);
+      window.localStorage.setItem('medikiosk.consultationId', consultation.id);
+      navigate('/consent');
+    } catch {
+      setLookupError('Demo data could not be created. Check that the API is running.');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   const handleScan = async (abhaId: string) => {
     try { setPatient(await getPatient(abhaId)); setLookupError(''); }
@@ -68,6 +96,9 @@ const IdentifyScreen: React.FC = () => {
               />
               <RoyalButton variant="secondary" className="w-full" onClick={handleManualSubmit}>
                 Find local record
+              </RoyalButton>
+              <RoyalButton variant="secondary" className="w-full mt-3" disabled={demoLoading} onClick={() => void startDemoPatient()}>
+                {demoLoading ? 'Preparing demo patient...' : 'Use random demo patient'}
               </RoyalButton>
               {lookupError && <p className="mt-4 text-warning text-sm">{lookupError}</p>}
               {lookupError && (

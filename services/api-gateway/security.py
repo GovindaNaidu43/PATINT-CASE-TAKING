@@ -36,6 +36,8 @@ def jwks_client() -> jwt.PyJWKClient:
 
 def require_staff(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
     if not credentials:
+        if settings.environment == "development":
+            return {"sub": "local-physician", "preferred_username": "local-physician", "realm_access": {"roles": ["physician", "clinic_admin"]}}
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Staff sign-in is required")
     try:
         key = jwks_client().get_signing_key_from_jwt(credentials.credentials)

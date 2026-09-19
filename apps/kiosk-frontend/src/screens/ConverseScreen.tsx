@@ -60,6 +60,30 @@ const ConverseScreen: React.FC = () => {
     void handleAnswer(text, 'voice');
   };
 
+  const handleDemoConversation = async () => {
+    if (!consultationId || isSubmitting || isDone) return;
+    setIsSubmitting(true);
+    try {
+      const answers = ['Headache and tiredness', 'Moderate', 'For two days', 'No fever or vomiting'];
+      let nextQuestion = question;
+      for (const answer of answers) {
+        const result = await submitDialogueTurn(consultationId, answer, 'text');
+        setTurns(previous => [...previous, { speaker: 'patient', text: answer }]);
+        if (result.red_flags?.length) {
+          setRedFlags(previous => [...previous, ...result.red_flags.map((flag: { phrase: string; action: string }) => `${flag.phrase}: ${flag.action}`)]);
+        }
+        if (!result.next_question) break;
+        nextQuestion = result.next_question;
+        setTurns(previous => [...previous, { speaker: 'nurse', text: result.next_question }]);
+      }
+      setQuestion(nextQuestion);
+      setIsDone(true);
+      navigate('/scan');
+    } catch {
+      setTurns(previous => [...previous, { speaker: 'nurse', text: 'Demo answers could not be saved. Please try again.' }]);
+    } finally { setIsSubmitting(false); }
+  };
+
   return (
     <div className="flex-1 flex p-8 relative">
       <RedFlagAlert flags={redFlags} />
@@ -114,6 +138,11 @@ const ConverseScreen: React.FC = () => {
             <p className="text-center text-sm italic mb-8" style={{ color: '#A89070' }}>
               {t('converse.hint')}
             </p>
+          )}
+          {!isDone && (
+            <button type="button" onClick={() => void handleDemoConversation()} disabled={isSubmitting} className="mx-auto text-sm text-royal-muted underline hover:text-royal-gold disabled:opacity-50">
+              Skip conversation with demo answers
+            </button>
           )}
         </div>
         <div className="mt-auto">

@@ -17,12 +17,19 @@ async def create_consultation(payload: ConsultationCreate, _: str = Depends(kios
 
 @router.get("/{consultation_id}")
 def get_consultation(consultation_id: str, _: dict = Depends(require_staff), db: Session = Depends(get_db)):
+    return consultation_response(consultation_id, db)
+
+@router.get("/{consultation_id}/kiosk-summary")
+def get_kiosk_summary(consultation_id: str, _: str = Depends(kiosk_identity), db: Session = Depends(get_db)):
+    return consultation_response(consultation_id, db)
+
+def consultation_response(consultation_id: str, db: Session) -> dict:
     consultation = db.get(Consultation, consultation_id)
     if not consultation: raise HTTPException(404, "Consultation not found")
     patient = db.get(Patient, consultation.patient_id)
     consent = db.execute(select(ConsentRecord).where(ConsentRecord.consultation_id == consultation.id).order_by(ConsentRecord.granted_at.desc())).scalars().first()
     prescriptions = db.execute(select(Prescription).where(Prescription.consultation_id == consultation.id).order_by(Prescription.created_at.desc())).scalars().all()
-    return {"id": consultation.id, "status": consultation.status, "created_at": consultation.created_at.isoformat(), "updated_at": consultation.updated_at.isoformat(), "patient": {"id": patient.id, "name": patient.name, "age": patient.age, "gender": patient.gender, "contact": patient.contact, "blood_group": patient.blood_group, "occupation": patient.occupation, "abha_id": patient.abha_id}, "turns": consultation.turns or [], "red_flags": consultation.red_flags or [], "consent": {"purposes": consent.purposes, "language": consent.language, "granted_at": consent.granted_at.isoformat()} if consent else None, "prescriptions": [prescription_response(item) for item in prescriptions]}
+    return {"id": consultation.id, "status": consultation.status, "created_at": consultation.created_at.isoformat() if consultation.created_at else None, "updated_at": consultation.updated_at.isoformat() if consultation.updated_at else None, "patient": {"id": patient.id, "name": patient.name, "age": patient.age, "gender": patient.gender, "contact": patient.contact, "blood_group": patient.blood_group, "occupation": patient.occupation, "abha_id": patient.abha_id}, "turns": consultation.turns or [], "red_flags": consultation.red_flags or [], "consent": {"purposes": consent.purposes, "language": consent.language, "granted_at": consent.granted_at.isoformat()} if consent else None, "prescriptions": [prescription_response(item) for item in prescriptions]}
 
 @router.post("/{consultation_id}/prescriptions", status_code=201)
 def create_prescription(consultation_id: str, payload: PrescriptionCreate, staff: dict = Depends(require_physician), db: Session = Depends(get_db)):

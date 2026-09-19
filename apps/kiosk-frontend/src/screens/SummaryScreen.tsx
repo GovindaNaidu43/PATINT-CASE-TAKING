@@ -31,6 +31,7 @@ const SummaryScreen: React.FC = () => {
   const [consultation, setConsultation] = useState<ConsultationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const jihvaSkipped = window.localStorage.getItem('medikiosk.jihvaSkipped') === 'true';
 
   useEffect(() => {
     const consultationId = window.localStorage.getItem('medikiosk.consultationId');
@@ -145,7 +146,9 @@ const SummaryScreen: React.FC = () => {
           </h3>
           <SignalBadge />
           <p className="text-royal-ivory text-sm">
-            {consultation?.status === 'priority_review'
+            {jihvaSkipped
+              ? 'Tongue analysis was skipped for this demo. Physician review can continue with the available history.'
+              : consultation?.status === 'priority_review'
               ? 'Priority review requested due to red flags.'
               : 'Tongue analysis captured. Physician review pending.'}
           </p>
@@ -174,6 +177,7 @@ const SummaryScreen: React.FC = () => {
 
       <RoyalButton size="lg" onClick={() => {
         window.localStorage.removeItem('medikiosk.consultationId');
+        window.localStorage.removeItem('medikiosk.jihvaSkipped');
         navigate('/');
       }} className="w-64">
         {t('summary.done')}

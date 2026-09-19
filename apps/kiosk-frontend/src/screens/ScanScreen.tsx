@@ -21,7 +21,12 @@ const ScanScreen: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const result = await ingestDocument(file);
+      const consultationId = window.localStorage.getItem('medikiosk.consultationId');
+      if (!consultationId) {
+        setError('Start a consultation before uploading a document.');
+        return;
+      }
+      const result = await ingestDocument(file, consultationId);
       setOcrData({ ...(result as OCRData), filename: file.name });
     } catch {
       setError('Could not process the document. Please try again or skip.');

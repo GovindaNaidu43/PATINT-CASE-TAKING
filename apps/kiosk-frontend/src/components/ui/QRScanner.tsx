@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 interface Props {
   onScan: (abhaId: string) => void;
@@ -7,14 +8,46 @@ interface Props {
 
 const QRScanner: React.FC<Props> = ({ onScan }) => {
   const [scanning, setScanning] = useState(true);
+  const [error, setError] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const onScanRef = useRef(onScan);
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setScanning(false);
-      onScan('91-1234-5678-9012'); // Mock ABHA ID
-    }, 3000);
-    return () => clearTimeout(timer);
+    onScanRef.current = onScan;
   }, [onScan]);
+
+  useEffect(() => {
+    let mounted = true;
+    const reader = new BrowserMultiFormatReader();
+
+    if (!videoRef.current) return () => undefined;
+
+    reader.decodeFromVideoDevice(undefined, videoRef.current, (result, decodeError) => {
+      if (!mounted) return;
+      if (result) {
+        setScanning(false);
+        controlsRef.current?.stop();
+        onScanRef.current(result.getText().trim());
+      } else if (decodeError && decodeError.name !== 'NotFoundException') {
+        setError('The QR code could not be read. You can enter the ABHA ID manually.');
+      }
+    }).then(controls => {
+      if (mounted) controlsRef.current = controls;
+      else controls.stop();
+    }).catch(() => {
+      if (mounted) {
+        setScanning(false);
+        setError('Camera access is unavailable. Enter the ABHA ID manually.');
+      }
+    });
+
+    return () => {
+      mounted = false;
+      controlsRef.current?.stop();
+      controlsRef.current = null;
+    };
+  }, []);
 
   return (
     <div
@@ -25,6 +58,7 @@ const QRScanner: React.FC<Props> = ({ onScan }) => {
         borderColor: 'rgba(184,134,60,0.40)',
       }}
     >
+      <video ref={videoRef} muted playsInline className="absolute inset-0 h-full w-full object-cover" />
       {scanning ? (
         <>
           {/* Subtle grid overlay */}
@@ -50,7 +84,7 @@ const QRScanner: React.FC<Props> = ({ onScan }) => {
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="px-4 py-2 rounded font-sans animate-pulse text-sm"
                   style={{ background: 'rgba(26,18,8,0.75)', color: '#C9974B' }}>
-              Scanning...
+              Point the camera at an ABHA QR code
             </span>
           </div>
         </>
@@ -66,6 +100,12 @@ const QRScanner: React.FC<Props> = ({ onScan }) => {
             </div>
             <span className="font-bold font-display text-xl" style={{ color: '#5A7A55' }}>Found!</span>
           </div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-x-4 bottom-4 rounded-lg px-3 py-2 text-center text-xs"
+             style={{ background: 'rgba(26,18,8,0.82)', color: '#F0DEC0' }}>
+          {error}
         </div>
       )}
     </div>

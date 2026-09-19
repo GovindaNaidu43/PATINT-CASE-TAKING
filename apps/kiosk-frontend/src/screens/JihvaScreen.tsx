@@ -12,6 +12,8 @@ const JihvaScreen: React.FC = () => {
   const [captured, setCaptured] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [capturePreview, setCapturePreview] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -31,8 +33,15 @@ const JihvaScreen: React.FC = () => {
     const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', .9));
     const consultationId = window.localStorage.getItem('medikiosk.consultationId');
     if (!blob || !consultationId) { setError('Start a consultation before capturing.'); return; }
-    try { setResult(await analyzeJihva(consultationId, blob)); setCaptured(true); streamRef.current?.getTracks().forEach(track => track.stop()); }
-    catch { setError('The tongue image could not be analyzed. Please try again.'); }
+    setAnalyzing(true);
+    try {
+      setCapturePreview(canvas.toDataURL('image/jpeg', .9));
+      setResult(await analyzeJihva(consultationId, blob));
+      window.localStorage.removeItem('medikiosk.jihvaSkipped');
+      setCaptured(true);
+      streamRef.current?.getTracks().forEach(track => track.stop());
+    } catch { setError('The tongue image could not be analyzed. Please try again.'); }
+    finally { setAnalyzing(false); }
   };
 
   return (
@@ -62,16 +71,19 @@ const JihvaScreen: React.FC = () => {
             </div>
           </div>
           
-          <RoyalButton size="lg" onClick={() => void (streamRef.current ? handleCapture() : startCamera())} className="w-64">
-            {t('jihva.capture')}
+          <RoyalButton disabled={analyzing} size="lg" onClick={() => void (streamRef.current ? handleCapture() : startCamera())} className="w-64">
+            {analyzing ? 'Analyzing…' : t('jihva.capture')}
           </RoyalButton>
+          <button type="button" onClick={() => { window.localStorage.setItem('medikiosk.jihvaSkipped', 'true'); navigate('/summary'); }} disabled={analyzing} className="mt-4 text-sm text-royal-muted underline hover:text-royal-gold disabled:opacity-50">
+            Skip Jihva for demo
+          </button>
           {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
         </div>
       ) : (
         <div className="flex flex-col items-center w-full max-w-4xl">
           <div className="grid grid-cols-2 gap-8 w-full mb-8">
             <div className="w-full aspect-video bg-black rounded-xl border border-royal-gold/30 flex items-center justify-center">
-              <span className="text-4xl text-gray-600">Image captured</span>
+              {capturePreview ? <img src={capturePreview} alt="Captured tongue" className="h-full w-full object-cover rounded-xl" /> : <span className="text-4xl text-gray-600">Image captured</span>}
             </div>
 
             <RoyalCard className="p-6 flex flex-col justify-center">
@@ -85,6 +97,9 @@ const JihvaScreen: React.FC = () => {
           <RoyalButton size="lg" onClick={() => navigate('/summary')} className="w-64">
             {t('jihva.continue')}
           </RoyalButton>
+          <button type="button" onClick={() => { window.localStorage.setItem('medikiosk.jihvaSkipped', 'true'); navigate('/summary'); }} className="mt-4 text-sm text-royal-muted underline hover:text-royal-gold">
+            Continue without Jihva analysis
+          </button>
         </div>
       )}
     </div>

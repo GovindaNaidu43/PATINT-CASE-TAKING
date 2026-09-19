@@ -1,13 +1,17 @@
 from dataclasses import dataclass
 import os
+from pathlib import Path
+
+DEFAULT_DATABASE_URL = f"sqlite:///{(Path(__file__).resolve().parent / 'medikiosk.db').as_posix()}"
 
 @dataclass(frozen=True)
 class Settings:
-    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./medikiosk.db")
+    environment: str = os.getenv("ENVIRONMENT", "development")
+    database_url: str = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
     mock_external_services: bool = os.getenv("MOCK_EXTERNAL_SERVICES", "true").lower() == "true"
     abdm_base_url: str = os.getenv("ABDM_BASE_URL", "https://sandbox.abdm.gov.in")
     allowed_origins: tuple[str, ...] = tuple(filter(None, os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")))
-    kiosk_api_key: str = os.getenv("KIOSK_API_KEY", "")
+    kiosk_api_key: str = os.getenv("KIOSK_API_KEY", "local-development-kiosk-key" if os.getenv("ENVIRONMENT", "development") == "development" else "")
     keycloak_issuer: str = os.getenv("KEYCLOAK_ISSUER", "")
     keycloak_jwks_url: str = os.getenv("KEYCLOAK_JWKS_URL", "")
     keycloak_audience: str = os.getenv("KEYCLOAK_AUDIENCE", "medikiosk-api")

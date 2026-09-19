@@ -25,6 +25,17 @@ const DiagnosticsScreen: React.FC = () => {
     setChecks(previous => previous.map(check => check.id === id ? { ...check, state, detail } : check));
   };
 
+  const createDiagnosticContext = async () => {
+    const patient = await apiClient.post('/patients', { name: `Diagnostics ${Date.now()}` });
+    const consultation = await apiClient.post('/consultations', { patient_id: patient.data.id });
+    await apiClient.post('/patients/consents', {
+      consultation_id: consultation.data.id,
+      purposes: ['care', 'voice_biomarker', 'jihva_image', 'followup'],
+      language: 'en',
+    });
+    return consultation.data.id as string;
+  };
+
   const runCheck = async (id: string) => {
     update(id, 'running');
     try {
@@ -33,24 +44,28 @@ const DiagnosticsScreen: React.FC = () => {
         const response = await apiClient.get('/health');
         detail = JSON.stringify(response.data);
       } else if (id === 'workflow') {
-        const patient = await apiClient.post('/patients', { name: `Diagnostics ${Date.now()}`, consent_granted: true });
-        const consultation = await apiClient.post('/consultations', { patient_id: patient.data.id });
-        const turn = await apiClient.post(`/dialogue/turn?consultation_id=${consultation.data.id}`, { text: 'Headache', modality: 'touch', language: 'en' });
-        detail = JSON.stringify({ consultation_id: consultation.data.id, phase: turn.data.phase, question_key: turn.data.question_key });
+        const consultationId = await createDiagnosticContext();
+        const turn = await apiClient.post(`/dialogue/turn?consultation_id=${consultationId}`, { text: 'Headache', modality: 'touch', language: 'en' });
+        detail = JSON.stringify({ consultation_id: consultationId, phase: turn.data.phase, question_key: turn.data.question_key });
       } else if (id === 'ocr') {
+        const consultationId = await createDiagnosticContext();
         const form = new FormData();
         form.append('file', new Blob(['Sample prescription: paracetamol 500 mg'], { type: 'text/plain' }), 'diagnostics.txt');
+        form.append('consultation_id', consultationId);
         const response = await apiClient.post('/documents/ingest', form);
         detail = JSON.stringify({ text: response.data.text, entities: response.data.entities });
       } else if (id === 'signals') {
+        const consultationId = await createDiagnosticContext();
         const image = new FormData();
         image.append('image', new Blob(['sample tongue image'], { type: 'image/jpeg' }), 'diagnostics.jpg');
+        image.append('consultation_id', consultationId);
         const audio = new FormData();
         audio.append('audio', new Blob(['sample voice audio'], { type: 'audio/wav' }), 'diagnostics.wav');
         const [jihva, voice] = await Promise.all([apiClient.post('/signals/jihva', image), apiClient.post('/signals/voice', audio)]);
         detail = JSON.stringify({ jihva: jihva.data, voice: voice.data });
       } else if (id === 'summary') {
-        const draft = await apiClient.post('/summaries', { consultation_id: 'diagnostics', facts: ['Patient reports headache'], sources: ['turn:0'] });
+        const consultationId = await createDiagnosticContext();
+        const draft = await apiClient.post('/summaries', { consultation_id: consultationId, facts: ['Patient reports headache'], sources: ['turn:0'] });
         await apiClient.post(`/summaries/${draft.data.id}/confirm?physician_id=diagnostics-physician`);
         const released = await apiClient.post(`/summaries/${draft.data.id}/release`);
         detail = JSON.stringify(released.data);
@@ -58,7 +73,8 @@ const DiagnosticsScreen: React.FC = () => {
         const response = await apiClient.post('/abdm/abha/verify', { abha_address: 'diagnostics@abdm' });
         detail = JSON.stringify(response.data);
       } else if (id === 'followup') {
-        const schedule = await apiClient.post('/followups/schedule', { consultation_id: 'diagnostics', destination: '+910000000000', hours: 24 });
+        const consultationId = await createDiagnosticContext();
+        const schedule = await apiClient.post('/followups/schedule', { consultation_id: consultationId, destination: '+910000000000', hours: 24 });
         const response = await apiClient.post('/followups/response', { text: 'I feel better today' });
         detail = JSON.stringify({ schedule: schedule.data, response: response.data });
       }

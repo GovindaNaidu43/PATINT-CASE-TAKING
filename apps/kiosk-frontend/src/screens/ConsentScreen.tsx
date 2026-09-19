@@ -29,6 +29,16 @@ const ConsentScreen: React.FC = () => {
 
   const allAccepted = consents.every(Boolean);
 
+  const continueWithDemoConsent = async () => {
+    const consultationId = window.localStorage.getItem('medikiosk.consultationId');
+    if (!consultationId) return navigate('/identify');
+    setSubmitting(true);
+    try {
+      await grantConsent(consultationId, 'en', ['care', 'voice_biomarker', 'jihva_image', 'followup']);
+      navigate('/converse');
+    } finally { setSubmitting(false); }
+  };
+
   return (
     <div className="flex-1 flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
       <h2 className="text-4xl font-display text-royal-gold mb-8 mt-4">
@@ -91,6 +101,9 @@ const ConsentScreen: React.FC = () => {
         >
           {t('consent.proceed')}
         </RoyalButton>
+        <button type="button" onClick={() => void continueWithDemoConsent()} disabled={submitting} className="mt-4 text-sm text-royal-muted underline hover:text-royal-gold disabled:opacity-50">
+          Skip consent choices for demo
+        </button>
       </div>
     </div>
   );

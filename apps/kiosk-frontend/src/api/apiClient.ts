@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  headers: { 'X-Kiosk-Key': import.meta.env.VITE_KIOSK_API_KEY || '' },
+  headers: { 'X-Kiosk-Key': import.meta.env.VITE_KIOSK_API_KEY || 'local-development-kiosk-key' },
 });
 
 export const getPatient = async (abhaId: string) => {
@@ -23,7 +23,7 @@ export const createConsultation = async (patientId: string) => {
 };
 
 export const getConsultation = async (consultationId: string) => {
-  const response = await apiClient.get(`/consultations/${encodeURIComponent(consultationId)}`);
+  const response = await apiClient.get(`/consultations/${encodeURIComponent(consultationId)}/kiosk-summary`);
   return response.data;
 };
 
@@ -45,9 +45,10 @@ export const grantConsent = async (consultationId: string, language: 'en' | 'hi'
   return response.data;
 };
 
-export const ingestDocument = async (file: File) => {
+export const ingestDocument = async (file: File, consultationId: string) => {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('consultation_id', consultationId);
   const response = await apiClient.post('/documents/ingest', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -68,8 +69,9 @@ export const analyzeJihva = async (consultationId: string, image: Blob) => {
   return (await apiClient.post('/signals/jihva', form, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
 };
 
-export const getOCRResult = async (_documentId: string) => {
-  return { success: true };
+export const getOCRResult = async (documentId: string) => {
+  const response = await apiClient.get(`/documents/${encodeURIComponent(documentId)}`);
+  return response.data;
 };
 
 export default apiClient;
